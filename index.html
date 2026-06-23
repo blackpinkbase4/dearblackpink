@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dear BLACKPINK — Sealed Letters of Connection</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <!-- Font Awesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+    <!-- Floating background elements -->
+    <div class="bg-decorations">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="logo">
+            <span class="logo-icon"><i class="fa-solid fa-camera-retro"></i></span>
+            <span class="logo-text">Dear BLACKPINK</span>
+        </div>
+        
+        <!-- Tab Navigation Switcher -->
+        <nav class="app-nav">
+            <button id="nav-capsule" class="nav-link active">
+                <i class="fa-solid fa-hourglass-half"></i> Time Capsule
+            </button>
+            <button id="nav-media-hub" class="nav-link">
+                <i class="fa-solid fa-photo-film"></i> Fan Media Hub
+            </button>
+        </nav>
+
+        <div class="header-controls">
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle-btn" class="btn-theme-toggle" title="Toggle BLACK & PINK Mode">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            
+            <!-- Simulated Unlock Lock Button (Hidden by default, shown only during simulation) -->
+            <button id="admin-lock-btn" class="btn-lock-vault hidden" title="Lock the simulated vault.">
+                <i class="fa-solid fa-lock"></i> Lock Vault
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-container">
+        
+        <!-- VIEW 1: GATEKEEPER / WELCOME -->
+        <section id="view-gatekeeper" class="app-view active">
+            <div class="card intro-card">
+                <div class="heart-pulse-icon">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+                <h1 class="display-title">Enter the Sealed Vault</h1>
+                <p class="subtitle">A place for sharing love and thoughts to fellow BLINKs or your Pinks. Your letters will remain sealed in a digital vault until August 8th, 2026, at 12:00 AM (Midnight).</p>
+                
+                <!-- Live Letter counter progress bar -->
+                <div class="target-counter-container">
+                    <div class="target-counter-header">
+                        <span class="target-title"><i class="fa-solid fa-envelope-circle-check"></i> Letters Sealed Globally</span>
+                        <span class="target-count" id="target-count-text">0 / 500</span>
+                    </div>
+                    <div class="target-progress-bar">
+                        <div id="target-progress-fill" class="target-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="target-subtext">Join the community in sealing 500 letters for Blackpink's 10th Anniversary!</div>
+                </div>
+                
+                <form id="gatekeeper-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="sender-nickname">What is your nickname?</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fa-regular fa-user"></i></span>
+                            <input type="text" id="sender-nickname" placeholder="e.g., StarryEyes, Sunflower" required maxlength="25">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recipient-name">Who is this letter for?</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fa-solid fa-paper-plane"></i></span>
+                            <input type="text" id="recipient-name" placeholder="e.g., A fellow fan, A stranger, Lily" required maxlength="25">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        Enter Capsule <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW 2: WRITE LETTER -->
+        <section id="view-write" class="app-view">
+            <div class="write-header">
+                <button id="back-to-gate" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Change Names</button>
+                <div class="user-badge">
+                    <span class="badge-from">From: <strong id="badge-sender"></strong></span>
+                    <span class="badge-separator"><i class="fa-solid fa-arrow-right-long"></i></span>
+                    <span class="badge-to">To: <strong id="badge-recipient"></strong></span>
+                </div>
+            </div>
+
+            <div class="card pad-card">
+                <div class="letter-sheet">
+                    <div class="letter-lines">
+                        <textarea id="letter-content" placeholder="Write your letter here... (e.g., Dear friend, I hope you are happy when the capsule opens...)" maxlength="600" required></textarea>
+                    </div>
+                </div>
+
+                <!-- Custom Decorative Sticker Selector -->
+                <div class="sticker-selector-container">
+                    <label class="sticker-label">Choose a Decorative Stamp Sticker:</label>
+                    <div class="sticker-options">
+                        <label class="sticker-option">
+                            <input type="radio" name="polaroid-sticker" value="heart" checked>
+                            <span class="sticker-preview sticker-heart" title="Heart Stamp"><i class="fa-solid fa-heart"></i></span>
+                        </label>
+                        <label class="sticker-option">
+                            <input type="radio" name="polaroid-sticker" value="sparkle">
+                            <span class="sticker-preview sticker-sparkle" title="Sparkle Stamp"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                        </label>
+                        <label class="sticker-option">
+                            <input type="radio" name="polaroid-sticker" value="star">
+                            <span class="sticker-preview sticker-star" title="Star Stamp"><i class="fa-solid fa-star"></i></span>
+                        </label>
+                        <label class="sticker-option">
+                            <input type="radio" name="polaroid-sticker" value="flower">
+                            <span class="sticker-preview sticker-flower" title="Flower Stamp"><i class="fa-solid fa-seedling"></i></span>
+                        </label>
+                        <label class="sticker-option">
+                            <input type="radio" name="polaroid-sticker" value="smile">
+                            <span class="sticker-preview sticker-smile" title="Smile Stamp"><i class="fa-regular fa-face-smile-beam"></i></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom Member dedication selector -->
+                <div class="member-selector-container">
+                    <label class="member-selector-label">Dedicate this letter to:</label>
+                    <div class="member-options">
+                        <label class="member-option">
+                            <input type="radio" name="member-tag" value="all" checked>
+                            <span class="member-badge">All of BLACKPINK</span>
+                        </label>
+                        <label class="member-option">
+                            <input type="radio" name="member-tag" value="jisoo">
+                            <span class="member-badge">JISOO 🐰</span>
+                        </label>
+                        <label class="member-option">
+                            <input type="radio" name="member-tag" value="jennie">
+                            <span class="member-badge">JENNIE 🐻</span>
+                        </label>
+                        <label class="member-option">
+                            <input type="radio" name="member-tag" value="rose">
+                            <span class="member-badge">ROSÉ 🐿️</span>
+                        </label>
+                        <label class="member-option">
+                            <input type="radio" name="member-tag" value="lisa">
+                            <span class="member-badge">LISA 🐥</span>
+                        </label>
+                        <label class="member-option">
+                            <input type="radio" name="member-tag" value="blink">
+                            <span class="member-badge">A Fellow BLINK 🖤💗</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Polaroid Border Skin Selector -->
+                <div class="skin-selector-container">
+                    <label class="skin-label">Choose a Polaroid Photocard Border:</label>
+                    <div class="skin-options">
+                        <label class="skin-option">
+                            <input type="radio" name="polaroid-skin" value="classic" checked>
+                            <span class="skin-preview skin-classic" title="Classic White border">Classic</span>
+                        </label>
+                        <label class="skin-option">
+                            <input type="radio" name="polaroid-skin" value="glitter">
+                            <span class="skin-preview skin-glitter" title="Glittery Pink border">Glitter</span>
+                        </label>
+                        <label class="skin-option">
+                            <input type="radio" name="polaroid-skin" value="dark">
+                            <span class="skin-preview skin-dark" title="Minimalist Black border">Midnight</span>
+                        </label>
+                        <label class="skin-option">
+                            <input type="radio" name="polaroid-skin" value="holo">
+                            <span class="skin-preview skin-holo" title="Shimmering Holographic border">Holographic</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="char-counter">
+                    <span id="chars-used">0</span> / 600 characters
+                </div>
+
+                <button id="seal-letter-btn" class="btn btn-primary btn-seal">
+                    <i class="fa-solid fa-envelope-shield"></i> Seal in Time Capsule
+                </button>
+            </div>
+        </section>
+
+        <!-- VIEW 3: COUNTDOWN / SEALED -->
+        <section id="view-countdown" class="app-view">
+            <div class="card countdown-card">
+                <!-- Success Popup Banner inside countdown -->
+                <div class="success-banner" id="success-banner">
+                    <div class="banner-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="banner-content">
+                        <h3>Message Sealed Successfully!</h3>
+                        <p>Your letter has been placed inside the polaroid vault.</p>
+                    </div>
+                </div>
+
+                <!-- Live Letter counter progress bar in countdown view -->
+                <div class="target-counter-container" style="margin-bottom: 32px;">
+                    <div class="target-counter-header">
+                        <span class="target-title"><i class="fa-solid fa-envelope-circle-check"></i> Letters Sealed Globally</span>
+                        <span class="target-count" id="cd-target-count-text">0 / 500</span>
+                    </div>
+                    <div class="target-progress-bar">
+                        <div id="cd-target-progress-fill" class="target-progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <h2 class="view-title">The Vault Unlocks In:</h2>
+                
+                <!-- Elegant Circular/Boxed Countdown Layout -->
+                <div class="countdown-display">
+                    <div class="countdown-unit">
+                        <span class="count-number" id="cd-days">00</span>
+                        <span class="count-label">Days</span>
+                    </div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit">
+                        <span class="count-number" id="cd-hours">00</span>
+                        <span class="count-label">Hours</span>
+                    </div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit">
+                        <span class="count-number" id="cd-minutes">00</span>
+                        <span class="count-label">Minutes</span>
+                    </div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit">
+                        <span class="count-number" id="cd-seconds">00</span>
+                        <span class="count-label">Seconds</span>
+                    </div>
+                </div>
+
+                <div class="countdown-info">
+                    <p class="target-date-label"><i class="fa-regular fa-calendar-check"></i> Unlocking Date: <strong>August 8, 2026, at 12:00 AM (Midnight)</strong></p>
+                    <p class="explanation">On this date, the vault will open, and every letter written by fans all over the world will be displayed as vintage Polaroid snapshots for everyone to read.</p>
+                </div>
+
+                <div class="countdown-actions">
+                    <button id="write-another-btn" class="btn btn-secondary">
+                        <i class="fa-solid fa-pen-nib"></i> Write Another Letter
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: GALLERY (UNLOCKED) -->
+        <section id="view-gallery" class="app-view">
+            <div class="gallery-intro">
+                <h1 class="gallery-title">The Vault is Open</h1>
+                <p class="gallery-subtitle">Every Polaroid represents a heartfelt letter sealed away in anticipation. Search and click to read the stories shared between fans and strangers.</p>
+                
+                <div class="gallery-stats">
+                    <span id="total-letters-count"><i class="fa-solid fa-images"></i> 0 Polaroids Sealed</span>
+                </div>
+            </div>
+
+            <!-- Search and Filter Controls -->
+            <div class="filter-controls">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="gallery-search" placeholder="Search by Sender or Recipient...">
+                </div>
+                <div class="filter-options" style="flex-wrap: wrap;">
+                    <button class="btn-filter active" data-filter="all">All Letters</button>
+                    <button class="btn-filter" data-filter="sent-by-me">Written By Me</button>
+                    <button class="btn-filter" data-filter="to-me">For Me</button>
+                    <button class="btn-filter" data-filter="member-jisoo">🐰 Jisoo</button>
+                    <button class="btn-filter" data-filter="member-jennie">🐻 Jennie</button>
+                    <button class="btn-filter" data-filter="member-rose">🐿️ Rosé</button>
+                    <button class="btn-filter" data-filter="member-lisa">🐥 Lisa</button>
+                    <button class="btn-filter" data-filter="member-blink">🖤💗 BLINKS</button>
+                </div>
+            </div>
+
+            <!-- The Masonry Grid of Polaroids -->
+            <div class="polaroid-grid" id="polaroid-grid">
+                <!-- Dynamically populated Polaroids -->
+            </div>
+
+            <div class="gallery-empty-state hidden" id="gallery-empty">
+                <i class="fa-solid fa-ghost empty-icon"></i>
+                <h3>No Polaroids found matching your search.</h3>
+                <p>Try searching for a different nickname or write a new message!</p>
+            </div>
+
+            <div class="gallery-footer-action">
+                <button id="gallery-write-new" class="btn btn-primary">
+                    <i class="fa-solid fa-pencil"></i> Write a Message
+                </button>
+            </div>
+        </section>
+
+        <!-- VIEW 5: FAN MEDIA HUB (OPEN ALL TIME) -->
+        <section id="view-media-hub" class="app-view">
+            <div class="gallery-intro" style="margin-bottom: 30px;">
+                <h1 class="gallery-title">Fan Media Hub</h1>
+                <p class="gallery-subtitle">A creative space open at all times! Share your edits, fanart, wallpapers, or video creations with the community.</p>
+                <div class="gallery-stats">
+                    <span id="total-media-count"><i class="fa-solid fa-photo-film"></i> 0 Creations Shared</span>
+                </div>
+            </div>
+
+            <!-- Upload section -->
+            <div class="card pad-card" style="margin-bottom: 40px; padding: 32px;">
+                <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 20px; font-weight: 700;"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--color-primary); margin-right: 8px;"></i> Share a New Creation</h3>
+                
+                <form id="media-upload-form">
+                    <div class="media-upload-inputs">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="media-author">Your Nickname</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><i class="fa-regular fa-user"></i></span>
+                                <input type="text" id="media-author" placeholder="e.g., EditQueen" required maxlength="25">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="media-caption">Caption</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon"><i class="fa-regular fa-comment"></i></span>
+                                <input type="text" id="media-caption" placeholder="Short description of your edit..." required maxlength="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Dropzone -->
+                    <div class="form-group">
+                        <label>Upload Photo or Video</label>
+                        <div id="media-dropzone" class="media-dropzone">
+                            <input type="file" id="media-file-input" accept="image/*,video/*" required style="display: none;">
+                            <div class="dropzone-prompt" id="dropzone-prompt">
+                                <i class="fa-solid fa-photo-film dropzone-icon"></i>
+                                <p>Click to select or drag & drop</p>
+                                <span class="dropzone-sub">Supports images (JPG, PNG, GIF) and videos (MP4, WebM) up to 50MB</span>
+                            </div>
+                            <div class="dropzone-preview hidden" id="dropzone-preview">
+                                <!-- Image or Video preview populated dynamically -->
+                                <button type="button" class="btn-remove-preview" id="btn-remove-preview"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Publish Creation <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Media Grid -->
+            <div class="media-grid" id="media-grid">
+                <!-- Dynamically populated fan edits -->
+            </div>
+
+            <div class="gallery-empty-state hidden" id="media-empty">
+                <i class="fa-solid fa-photo-film empty-icon"></i>
+                <h3>No media shared yet.</h3>
+                <p>Be the first to share an edit or graphic!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Polaroid Zoom Modal Detail -->
+    <div class="modal-overlay" id="polaroid-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="polaroid-zoomed">
+                <div class="polaroid-photo-area">
+                    <!-- Stamp Sticker in corner -->
+                    <div class="polaroid-stamp" id="modal-polaroid-stamp">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div class="polaroid-letter-text" id="modal-polaroid-text">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+                <div class="polaroid-caption-area">
+                    <div class="polaroid-names">
+                        <span class="p-to">To: <span id="modal-to-name">Recipient</span></span>
+                        <span class="p-from">From: <span id="modal-from-name">Sender</span></span>
+                    </div>
+                    <button id="modal-delete-btn" class="btn-delete-modal-letter hidden" title="Delete letter"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                    <div class="polaroid-date" id="modal-polaroid-date">Jun 23, 2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Passcode Modal -->
+    <div class="modal-overlay" id="admin-passcode-modal">
+        <div class="modal-content passcode-modal-content">
+            <button class="modal-close" id="admin-modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="card passcode-card">
+                <div class="admin-lock-icon">
+                    <i class="fa-solid fa-lock-open"></i>
+                </div>
+                <h2 class="view-title" style="margin-bottom: 8px;">Admin Verification</h2>
+                <p class="explanation" style="margin-bottom: 24px;">Enter the administrator passcode to simulate vault unlock.</p>
+                
+                <form id="admin-passcode-form">
+                    <div class="form-group">
+                        <div class="input-wrapper" style="position: relative;">
+                            <span class="input-icon"><i class="fa-solid fa-key"></i></span>
+                            <input type="password" id="admin-passcode-input" placeholder="Enter Passcode" required style="padding-right: 48px;">
+                            <button type="button" id="toggle-password-visibility" class="btn-eye" style="position: absolute; right: 16px; background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1rem;"><i class="fa-regular fa-eye"></i></button>
+                        </div>
+                        <span class="error-msg" id="passcode-error-msg" style="color: #D32F2F; font-size: 0.85rem; font-weight: 600; display: block; margin-top: 8px; text-align: left; opacity: 0; transition: var(--transition-smooth);">Incorrect passcode. Please try again.</span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        Verify & Unlock <i class="fa-solid fa-shield-halved"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast-notification">
+        <span id="toast-message">Notification message here</span>
+    </div>
+
+    <!-- Photo Roll Sidebar (Right side, infinite vertical scroll) -->
+    <div class="photo-roll-container" id="photo-roll">
+        <div class="photo-roll-track" id="photo-roll-track">
+            <!-- 5 distinct memory photocard slots (user can place real images named bp_pic1.jpg to bp_pic5.jpg) -->
+            <div class="roll-photo-card">
+                <img src="bp_pic1.jpg" alt="Blackpink Memory 1" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic2.jpg" alt="Blackpink Memory 2" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic3.jpg" alt="Blackpink Memory 3" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic4.jpg" alt="Blackpink Memory 4" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic5.jpg" alt="Blackpink Memory 5" onerror="this.style.display='none'">
+            </div>
+            
+            <!-- Duplicated slots to loop seamlessly in infinite scroll -->
+            <div class="roll-photo-card">
+                <img src="bp_pic1.jpg" alt="Blackpink Memory 1" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic2.jpg" alt="Blackpink Memory 2" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic3.jpg" alt="Blackpink Memory 3" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic4.jpg" alt="Blackpink Memory 4" onerror="this.style.display='none'">
+            </div>
+            <div class="roll-photo-card">
+                <img src="bp_pic5.jpg" alt="Blackpink Memory 5" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </div>
+
+    <!-- Lo-Fi Ambient Music Player -->
+    <div class="music-player-widget" id="music-player">
+        <div class="player-vinyl-container">
+            <div class="player-vinyl" id="vinyl-disc">
+                <i class="fa-solid fa-compact-disc"></i>
+            </div>
+        </div>
+        <div class="player-details">
+            <div class="track-title" id="player-track-title">Silent Reflections</div>
+            <div class="track-subtitle">lo-fi instrumental piano</div>
+            <div class="player-controls">
+                <button id="btn-player-prev" class="btn-ctrl" title="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="btn-player-play" class="btn-ctrl play-pause-btn" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
+                <button id="btn-player-next" class="btn-ctrl" title="Next Track"><i class="fa-solid fa-forward-step"></i></button>
+            </div>
+        </div>
+        <!-- Hidden Audio tag -->
+        <audio id="ambient-audio" preload="auto" loop autoplay></audio>
+    </div>
+
+    <!-- Supabase JS Client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- JS Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
