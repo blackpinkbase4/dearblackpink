@@ -246,7 +246,25 @@ function setupEventListeners() {
             openAdminModal();
         }
     });
-
+    // Secret mobile/tap trigger: Click/tap the logo 5 times quickly to open admin modal
+    let logoClickCount = 0;
+    let logoClickTimeout = null;
+    const logoTrigger = document.querySelector('.logo');
+    if (logoTrigger) {
+        logoTrigger.addEventListener('click', () => {
+            logoClickCount++;
+            clearTimeout(logoClickTimeout);
+            
+            if (logoClickCount >= 5) {
+                logoClickCount = 0;
+                openAdminModal();
+            } else {
+                logoClickTimeout = setTimeout(() => {
+                    logoClickCount = 0;
+                }, 2000); // 2-second timeout window to complete the taps
+            }
+        });
+    }
     // Toggle Password eye visibility icon
     togglePasswordVisibility.addEventListener('click', () => {
         if (adminPasscodeInput.type === 'password') {
