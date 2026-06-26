@@ -103,15 +103,9 @@ body {
 }
 
 @keyframes blobFloat {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    50% {
-        transform: translate(50px, -30px) scale(1.1);
-    }
-    100% {
-        transform: translate(-30px, 40px) scale(0.95);
-    }
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(50px, -30px) scale(1.1); }
+    100% { transform: translate(-30px, 40px) scale(0.95); }
 }
 
 /* Elegant Header */
@@ -151,70 +145,6 @@ body {
     font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: -0.5px;
-}
-
-/* Debug Mode Switcher */
-.debug-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    background: white;
-    padding: 8px 16px;
-    border-radius: 50px;
-    box-shadow: var(--shadow-soft-sm);
-    border: 1px solid var(--color-border);
-    transition: var(--transition-smooth);
-    user-select: none;
-}
-
-.debug-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-soft-md);
-}
-
-.slider-label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--color-text-muted);
-}
-
-.toggle-slider {
-    position: relative;
-    width: 36px;
-    height: 20px;
-    background-color: var(--color-border);
-    border-radius: 20px;
-    transition: var(--transition-smooth);
-}
-
-.toggle-slider::before {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background-color: white;
-    top: 3px;
-    left: 3px;
-    transition: var(--transition-smooth);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.debug-toggle input {
-    display: none;
-}
-
-.debug-toggle input:checked + .slider-label {
-    color: var(--color-text-main);
-}
-
-.debug-toggle input:checked ~ .toggle-slider {
-    background-color: var(--color-primary);
-}
-
-.debug-toggle input:checked ~ .toggle-slider::before {
-    transform: translateX(16px);
 }
 
 /* View Container */
@@ -270,21 +200,11 @@ body {
 }
 
 @keyframes heartbeat {
-    0%, 100% {
-        transform: scale(1);
-    }
-    14% {
-        transform: scale(1.15);
-    }
-    28% {
-        transform: scale(1);
-    }
-    42% {
-        transform: scale(1.15);
-    }
-    70% {
-        transform: scale(1);
-    }
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.15); }
+    70% { transform: scale(1); }
 }
 
 .display-title {
@@ -350,7 +270,7 @@ body {
 
 .input-wrapper input:focus {
     border-color: var(--color-primary);
-    background-color: var(--color-bg-card); /* rgb(28, 24, 25) in dark mode, white in light mode */
+    background-color: var(--color-bg-card);
     box-shadow: 0 0 0 4px rgba(233, 157, 159, 0.15);
 }
 
@@ -803,7 +723,6 @@ body {
     user-select: none;
 }
 
-/* Small rotation logic to look natural */
 .polaroid:nth-child(3n+1) { transform: rotate(-2deg); }
 .polaroid:nth-child(3n+2) { transform: rotate(1.5deg); }
 .polaroid:nth-child(3n+3) { transform: rotate(-1deg); }
@@ -1072,6 +991,13 @@ body {
 .toast.active {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
+}
+
+body.dark-mode .toast {
+    background-color: #2D181B;
+    color: #FFF0F2;
+    border: 1px solid var(--color-primary);
+    box-shadow: 0 4px 20px rgba(255, 117, 144, 0.25);
 }
 
 /* Admin Lock Button */
@@ -1386,13 +1312,6 @@ body {
 
 /* Responsive adjustments */
 @media(max-width: 600px) {
-
-       .sticker-options {
-        flex-wrap: wrap;
-        gap: 12px;
-        justify-content: center;
-    }
-   
     .app-header {
         padding: 16px;
         flex-wrap: wrap;
@@ -1413,7 +1332,11 @@ body {
     .app-nav {
         order: 3;
         width: 100%;
-        justify-content: center;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        border-radius: 12px;
+        padding: 6px;
     }
     
     .logo-icon {
@@ -1438,7 +1361,8 @@ body {
     }
     
     .nav-link {
-        padding: 6px 12px;
+        justify-content: center;
+        padding: 8px 12px;
         font-size: 0.8rem;
         gap: 6px;
     }
@@ -1583,6 +1507,12 @@ body {
 
     .skin-option {
         flex: 1 1 calc(50% - 8px);
+    }
+
+    .sticker-options {
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
     }
 
     .filter-options {
@@ -2140,9 +2070,7 @@ body.dark-mode .btn-theme-toggle {
     }
 }
 
-/* ==========================================================================
-   5. Infinite Scrolling Memory Photo Roll (Right Side)
-   ========================================================================== */
+/* Infinite Scrolling Memory Photo Roll (Right Side) */
 .photo-roll-container {
     position: fixed;
     right: 40px;
@@ -2154,26 +2082,22 @@ body.dark-mode .btn-theme-toggle {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Start scrolling alignment from the top */
+    justify-content: flex-start;
     padding-top: 40px;
-    pointer-events: none; /* User can click through to items behind it */
+    pointer-events: none;
     transition: var(--transition-smooth);
 }
 
 .photo-roll-track {
     display: flex;
     flex-direction: column;
-    flex-shrink: 0; /* Keep track height rigid for accurate animation percentages */
+    flex-shrink: 0;
     animation: scrollUp 25s infinite linear;
 }
 
 @keyframes scrollUp {
-    0% {
-        transform: translateY(0);
-    }
-    100% {
-        transform: translateY(-50%); /* Loop exactly half the list since we duplicated items */
-    }
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
 }
 
 .roll-photo-card {
@@ -2187,14 +2111,13 @@ body.dark-mode .btn-theme-toggle {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end; /* Push text to bottom */
+    justify-content: flex-end;
     position: relative;
     overflow: hidden;
     margin-bottom: 20px;
-    flex-shrink: 0; /* Prevent cards from collapsing on smaller heights */
+    flex-shrink: 0;
 }
 
-/* Fallback placeholder visual elements (hidden when image successfully overlays) */
 .roll-photo-card::before {
     content: '🖤💗';
     font-size: 1.6rem;
@@ -2217,20 +2140,18 @@ body.dark-mode .btn-theme-toggle {
     top: 8px;
     left: 8px;
     width: calc(100% - 16px);
-    height: calc(100% - 32px); /* Leaves space for the bottom polaroid frame margin */
+    height: calc(100% - 32px);
     object-fit: cover;
     border-radius: 2px;
     border: 1px solid rgba(0,0,0,0.05);
     background-color: var(--color-primary-light);
-    z-index: 2; /* Sits on top of the fallback emojis */
+    z-index: 2;
 }
 
-/* Hide the photo roll entirely on tablet & mobile screens to avoid overlap */
 @media (max-width: 1100px) {
-    .photo-roll-container {
-        display: none !important;
-    }
+    .photo-roll-container { display: none !important; }
 }
+
 /* Custom Confirmation Modal Styles */
 .confirm-modal-content {
     max-width: 360px;
@@ -2261,10 +2182,72 @@ body.dark-mode .input-wrapper input:focus {
     border-color: var(--color-primary);
 }
 
-/* BLINK Quiz Option Hover Translate */
+/* ==========================================================================
+   BLINK Quiz Options and Utility Helper Styles (Fixes Live Site Bugs)
+   ========================================================================== */
+
+/* Critical utility helper to hide sections and modals */
+.hidden {
+    display: none !important;
+}
+
+/* Quiz Options wrapper */
+.quiz-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Base styles for dynamically populated Quiz buttons */
+.quiz-option-btn {
+    width: 100%;
+    padding: 14px 20px;
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .quiz-option-btn:hover {
     border-color: var(--color-primary);
     background-color: var(--color-primary-light);
     color: var(--color-primary);
     transform: translateX(6px);
+}
+
+/* PWA App Installation Header Button styles */
+.btn-install-app {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-soft-sm);
+}
+
+.btn-install-app:hover {
+    background-color: var(--color-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-install-app.hidden {
+    display: none !important;
 }
