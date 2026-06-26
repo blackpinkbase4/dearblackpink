@@ -350,7 +350,7 @@ body {
 
 .input-wrapper input:focus {
     border-color: var(--color-primary);
-    background-color: white;
+    background-color: var(--color-bg-card); /* rgb(28, 24, 25) in dark mode, white in light mode */
     box-shadow: 0 0 0 4px rgba(233, 157, 159, 0.15);
 }
 
