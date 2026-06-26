@@ -1118,90 +1118,57 @@ async function renderMediaShowcase(forceFetch = false) {
 }
 
 // Promise-based custom confirmation dialog
-function showCustomConfirm(message, confirmText = "Delete") {
-    return new Promise((resolve) => {
-        const modal = document.getElementById('confirm-modal');
-        const msgEl = document.getElementById('confirm-message');
-        const cancelBtn = document.getElementById('confirm-cancel-btn');
-        const okBtn = document.getElementById('confirm-ok-btn');
-        
-        msgEl.textContent = message;
-        okBtn.textContent = confirmText;
-        
-        modal.classList.add('active');
-        
-        function cleanup(result) {
-            modal.classList.remove('active');
-            cancelBtn.removeEventListener('click', onCancel);
-            okBtn.removeEventListener('click', onOk);
-            resolve(result);
-        }
-        
-        function onCancel() { cleanup(false); }
-        function onOk() { cleanup(true); }
-        
-        cancelBtn.addEventListener('click', onCancel);
-        okBtn.addEventListener('click', onOk);
-    });
-}
-
 async function deleteMediaItem(id) {
-    const confirmed = await showCustomConfirm('Are you sure you want to delete this creation?');
-    if (confirmed) {
-        // 1. Instantly remove from local cached memory and re-render grid
-        if (loadedMedia) {
-            loadedMedia = loadedMedia.filter(item => item.id !== id);
-        }
-        renderMediaShowcase(false); // fast re-render!
-        
-        // 2. Perform background delete query to database
-        try {
-            const { error } = await _supabase
-                .from('media')
-                .delete()
-                .eq('id', id);
-            if (error) throw error;
-        } catch (e) {
-            console.error('Failed to delete from database:', e);
-        }
-
-        // 3. Sync local fallback copy in parallel
-        let mediaList = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
-        mediaList = mediaList.filter(item => item.id !== id);
-        localStorage.setItem('polaroid_capsule_media', JSON.stringify(mediaList));
-        
-        showToast('Creation deleted.');
+    // 1. Instantly remove from local cached memory and re-render grid
+    if (loadedMedia) {
+        loadedMedia = loadedMedia.filter(item => item.id !== id);
     }
+    renderMediaShowcase(false); // fast re-render!
+    
+    // 2. Perform background delete query to database
+    try {
+        const { error } = await _supabase
+            .from('media')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    } catch (e) {
+        console.error('Failed to delete from database:', e);
+    }
+
+    // 3. Sync local fallback copy in parallel
+    let mediaList = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
+    mediaList = mediaList.filter(item => item.id !== id);
+    localStorage.setItem('polaroid_capsule_media', JSON.stringify(mediaList));
+    
+    showToast('Creation deleted.');
 }
 
 async function deleteLetterItem(id) {
-    const confirmed = await showCustomConfirm('Are you sure you want to delete this sealed letter?');
-    if (confirmed) {
-        // 1. Instantly remove from local cached memory and re-render grid
-        if (loadedLetters) {
-            loadedLetters = loadedLetters.filter(item => item.id !== id);
-        }
-        renderPolaroidGallery(false); // fast re-render!
-        
-        // 2. Perform background delete query to database
-        try {
-            const { error } = await _supabase
-                .from('letters')
-                .delete()
-                .eq('id', id);
-            if (error) throw error;
-        } catch (e) {
-            console.error('Failed to delete letter from database:', e);
-        }
-
-        // 3. Sync local fallback copy in parallel
-        let lettersList = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
-        lettersList = lettersList.filter(item => item.id !== id);
-        localStorage.setItem('polaroid_capsule_letters', JSON.stringify(lettersList));
-        
-        showToast('Letter deleted successfully.');
-        closeModal();
+    // 1. Instantly remove from local cached memory and re-render grid
+    if (loadedLetters) {
+        loadedLetters = loadedLetters.filter(item => item.id !== id);
     }
+    renderPolaroidGallery(false); // fast re-render!
+    
+    // 2. Perform background delete query to database
+    try {
+        const { error } = await _supabase
+            .from('letters')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    } catch (e) {
+        console.error('Failed to delete letter from database:', e);
+    }
+
+    // 3. Sync local fallback copy in parallel
+    let lettersList = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
+    lettersList = lettersList.filter(item => item.id !== id);
+    localStorage.setItem('polaroid_capsule_letters', JSON.stringify(lettersList));
+    
+    showToast('Letter deleted successfully.');
+    closeModal();
 }
 // ==========================================================================
 // BLACKPINK 10th Anniversary specialized helper logic
