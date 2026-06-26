@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="dark-mode">
     <!-- Floating background elements -->
@@ -23,12 +25,18 @@
 
     <!-- Header Navigation -->
     <header class="app-header">
-        <div class="logo">
-            <span class="logo-icon"><i class="fa-solid fa-camera-retro"></i></span>
-            <span class="logo-text">Dear BLACKPINK</span>
+        <div class="header-left" style="display: flex; align-items: center; gap: 16px;">
+            <div class="logo">
+                <span class="logo-icon"><i class="fa-solid fa-camera-retro"></i></span>
+                <span class="logo-text">Dear BLACKPINK</span>
+            </div>
+            <!-- PWA Install Button -->
+            <button id="btn-install-app" class="btn-install-app hidden" title="Install App to your device">
+                <i class="fa-solid fa-circle-down"></i> Install App
+            </button>
         </div>
         
-                <!-- Tab Navigation Switcher -->
+        <!-- Tab Navigation Switcher -->
         <nav class="app-nav">
             <button id="nav-capsule" class="nav-link active">
                 <i class="fa-solid fa-hourglass-half"></i> Time Capsule
@@ -64,9 +72,9 @@
                     <i class="fa-solid fa-heart"></i>
                 </div>
                 <h1 class="display-title">Enter the Sealed Vault</h1>
-              <p class="subtitle">A place for sharing love and thoughts to fellow BLINKs or your Pinks. Your letters will remain sealed in a digital vault until August 8th, 2026, at 12:00 AM KST (Korean Standard Time).</p>   
-         <!-- Live Letter counter progress bar -->
-
+                <p class="subtitle">A place for sharing love and thoughts to fellow BLINKs or your Pinks. Your letters will remain sealed in a digital vault until August 8th, 2026, at 12:00 AM KST (Korean Standard Time).</p>
+                
+                <!-- Live Letter counter progress bar -->
                 <div class="target-counter-container">
                     <div class="target-counter-header">
                         <span class="target-title"><i class="fa-solid fa-envelope-circle-check"></i> Letters Sealed Globally</span>
@@ -384,7 +392,8 @@
                 <p>Be the first to share an edit or graphic!</p>
             </div>
         </section>
-                <!-- VIEW 7: BLINK QUIZ (PERSONALITY MATCH) -->
+
+        <!-- VIEW 7: BLINK QUIZ (PERSONALITY MATCH) -->
         <section id="view-quiz" class="app-view">
             <div class="gallery-intro" style="margin-bottom: 30px;">
                 <h1 class="gallery-title">BLINK Quiz</h1>
@@ -497,6 +506,7 @@
             </div>
         </div>
     </div>
+
     <!-- Share on X (Twitter) Popup Modal -->
     <div class="modal-overlay" id="share-x-modal">
         <div class="modal-content card" style="max-width: 400px; padding: 32px 24px; text-align: center; border-top: 4px solid var(--color-primary); position: relative;">
@@ -513,6 +523,7 @@
             </div>
         </div>
     </div>
+
     <!-- Notification Toast -->
     <div class="toast" id="toast-notification">
         <span id="toast-message">Notification message here</span>
