@@ -27,11 +27,29 @@ const viewWrite = document.getElementById('view-write');
 const viewCountdown = document.getElementById('view-countdown');
 const viewGallery = document.getElementById('view-gallery');
 const viewMediaHub = document.getElementById('view-media-hub');
-const viewQuiz = document.getElementById('view-quiz'); 
+const viewQuiz = document.getElementById('view-quiz');
 const navCapsule = document.getElementById('nav-capsule');
+const navQuiz = document.getElementById('nav-quiz');
 const navMediaHub = document.getElementById('nav-media-hub');
-const navQuiz = document.getElementById('nav-quiz'); 
-const shareXModal = document.getElementById('share-x-modal'); 
+
+// BLINK Quiz Elements
+const quizActiveCard = document.getElementById('quiz-active-card');
+const quizResultCard = document.getElementById('quiz-result-card');
+const quizQuestionNum = document.getElementById('quiz-question-num');
+const quizProgressText = document.getElementById('quiz-progress-text');
+const quizProgressFill = document.getElementById('quiz-progress-fill');
+const quizQuestionTitle = document.getElementById('quiz-question-title');
+const quizOptionsContainer = document.getElementById('quiz-options-container');
+const quizResultImg = document.getElementById('quiz-result-img');
+const quizResultPlaceholder = document.getElementById('quiz-result-placeholder');
+const quizResultName = document.getElementById('quiz-result-name');
+const quizResultDesc = document.getElementById('quiz-result-desc');
+const btnQuizRestart = document.getElementById('btn-quiz-restart');
+
+// Share on X Modal Elements
+const shareXModal = document.getElementById('share-x-modal');
+const btnShareXPost = document.getElementById('btn-share-x-post');
+const btnShareXClose = document.getElementById('btn-share-x-close');
 
 const gatekeeperForm = document.getElementById('gatekeeper-form');
 const senderNicknameInput = document.getElementById('sender-nickname');
@@ -72,6 +90,11 @@ const btnRemovePreview = document.getElementById('btn-remove-preview');
 const mediaGrid = document.getElementById('media-grid');
 const mediaEmpty = document.getElementById('media-empty');
 const totalMediaCount = document.getElementById('total-media-count');
+
+// PWA Install Elements
+const btnInstallApp = document.getElementById('btn-install-app');
+let deferredPrompt = null;
+
 let photoRollContainer = null;
 let photoRollTrack = null;
 
@@ -153,30 +176,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Register Event Listeners
     setupEventListeners();
-
-        // Quiz restart button listener
-    const btnQuizRestart = document.getElementById('btn-quiz-restart');
-    if (btnQuizRestart) {
-        btnQuizRestart.addEventListener('click', () => {
-            initQuizState();
-        });
-    }
-
-    // Share Modal close buttons
-    const btnShareXClose = document.getElementById('btn-share-x-close');
-    if (btnShareXClose) {
-        btnShareXClose.addEventListener('click', () => {
-            shareXModal.classList.remove('active');
-        });
-    }
-
-    if (shareXModal) {
-        shareXModal.addEventListener('click', (e) => {
-            if (e.target === shareXModal) {
-                shareXModal.classList.remove('active');
-            }
-        });
-    }
 });
 
 // Navigation logic based on date and bypass state
@@ -275,6 +274,7 @@ function setupEventListeners() {
             openAdminModal();
         }
     });
+
     // Secret mobile/tap trigger: Click/tap the logo 5 times quickly to open admin modal
     let logoClickCount = 0;
     let logoClickTimeout = null;
@@ -294,6 +294,7 @@ function setupEventListeners() {
             }
         });
     }
+
     // Toggle Password eye visibility icon
     togglePasswordVisibility.addEventListener('click', () => {
         if (adminPasscodeInput.type === 'password') {
@@ -386,7 +387,7 @@ function setupEventListeners() {
             timestamp: Date.now()
         };
 
-               saveLetter(newLetter);
+        saveLetter(newLetter);
         
         // Show success popup animation / screen transition
         if (isVaultUnlocked()) {
@@ -462,7 +463,7 @@ function setupEventListeners() {
         });
     }
 
-        // Helper to toggle active state in header navigation
+    // Helper to toggle active state in header navigation
     function updateHeaderNavState(activeLink) {
         navCapsule.classList.remove('active');
         navQuiz.classList.remove('active');
@@ -526,6 +527,26 @@ function setupEventListeners() {
         
         switchView(viewMediaHub);
     });
+
+    // PWA Install Button Click Handler
+    if (btnInstallApp) {
+        btnInstallApp.addEventListener('click', () => {
+            if (!deferredPrompt) return;
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for user choice
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+                btnInstallApp.classList.add('hidden');
+            });
+        });
+    }
+
     // File Drag and Drop / Selection listeners
     mediaDropzone.addEventListener('click', () => {
         mediaFileInput.click();
@@ -617,7 +638,6 @@ function setupEventListeners() {
             }
 
             // Reset Form
-                       // Reset Form
             mediaCaptionInput.value = '';
             resetUploadPreview();
             showToast('Creation shared successfully!');
@@ -638,10 +658,267 @@ function setupEventListeners() {
             submitBtn.innerHTML = originalBtnText;
         }
     });
+
+    // Quiz restart button listener
+    btnQuizRestart.addEventListener('click', () => {
+        initQuizState();
+    });
+
+    // Share Modal close buttons
+    const btnShareXClose = document.getElementById('btn-share-x-close');
+    if (btnShareXClose) {
+        btnShareXClose.addEventListener('click', () => {
+            shareXModal.classList.remove('active');
+        });
+    }
+
+    if (shareXModal) {
+        shareXModal.addEventListener('click', (e) => {
+            if (e.target === shareXModal) {
+                shareXModal.classList.remove('active');
+            }
+        });
+    }
+}
+
+// ==========================================================================
+// 10-Question Personality Quiz Questions & Choices mapping
+// ==========================================================================
+const QUIZ_QUESTIONS = [
+    {
+        title: "1. What is your ideal weekend activity?",
+        choices: [
+            { text: "Exploring a cute bookshop or neighborhood cafe", member: "jisoo" },
+            { text: "Attending a fashion event or shopping downtown", member: "jennie" },
+            { text: "Strumming a guitar, singing, or painting at home", member: "rose" },
+            { text: "Learning a new dance choreography or playing arcade games", member: "lisa" }
+        ]
+    },
+    {
+        title: "2. Pick your favorite fashion aesthetic:",
+        choices: [
+            { text: "Classic, elegant, and preppy", member: "jisoo" },
+            { text: "Sleek, streetwear, and high-fashion luxury", member: "jennie" },
+            { text: "Bohemian, cozy knitwear, and vintage flowy pieces", member: "rose" },
+            { text: "Edgy, colorful, and bold accessories", member: "lisa" }
+        ]
+    },
+    {
+        title: "3. Choose your dream pet companion:",
+        choices: [
+            { text: "A cute, loyal puppy (like Dalgom!)", member: "jisoo" },
+            { text: "A sweet, fluffy cat that loves to cuddle", member: "jennie" },
+            { text: "A tiny aquarium fish or a sweet bird", member: "rose" },
+            { text: "A high-energy, playful puppy (like Love!)", member: "lisa" }
+        ]
+    },
+    {
+        title: "4. What is your typical role in a friend group?",
+        choices: [
+            { text: "The funny older sibling who cracks jokes and keeps peace", member: "jisoo" },
+            { text: "The trendsetter who coordinates the best places to go", member: "jennie" },
+            { text: "The emotional supporter who gives the warmest hugs", member: "rose" },
+            { text: "The active mood-maker who brings endless energy", member: "lisa" }
+        ]
+    },
+    {
+        title: "5. Select your favorite treat or beverage:",
+        choices: [
+            { text: "Sweet iced tea or a local fruit juice", member: "jisoo" },
+            { text: "A classic Iced Americano to stay sharp", member: "jennie" },
+            { text: "A warm, frothy vanilla latte or chamomile tea", member: "rose" },
+            { text: "A sweet strawberry milkshake or mango smoothie", member: "lisa" }
+        ]
+    },
+    {
+        title: "6. What kind of music playlist do you listen to most?",
+        choices: [
+            { text: "Classic retro pop and easy-listening acoustic tunes", member: "jisoo" },
+            { text: "Hip-hop, R&B, and modern synth beats", member: "jennie" },
+            { text: "Indie folk, acoustic guitar ballads, and soft soundtracks", member: "rose" },
+            { text: "High-energy dance pop, club hits, and global party tracks", member: "lisa" }
+        ]
+    },
+    {
+        title: "7. Pick your dream vacation destination:",
+        choices: [
+            { text: "Tokyo, Japan (cherry blossoms, old temples, and ramen)", member: "jisoo" },
+            { text: "Paris, France (art galleries, cafes, and fashion houses)", member: "jennie" },
+            { text: "London, UK (cozy parks, rainy streets, and musicals)", member: "rose" },
+            { text: "Hawaii, USA (surfing, hiking, and tropical beaches)", member: "lisa" }
+        ]
+    },
+    {
+        title: "8. Choose your signature color palette:",
+        choices: [
+            { text: "Soft lavender and pastel sky blue", member: "jisoo" },
+            { text: "Sleek charcoal black and pearl white", member: "jennie" },
+            { text: "Warm rose gold and champagne pink", member: "rose" },
+            { text: "Neon pink, bright yellow, and bold lime green", member: "lisa" }
+        ]
+    },
+    {
+        title: "9. How do you usually handle stress or pressure?",
+        choices: [
+            { text: "Stay calm, think logically, and crack a joke to ease the air", member: "jisoo" },
+            { text: "Take immediate control, solve it, and keep a cool head", member: "jennie" },
+            { text: "Let my emotions out, write, or listen to comfort music", member: "rose" },
+            { text: "Stay positive, call my friends, and laugh it off", member: "lisa" }
+        ]
+    },
+    {
+        title: "10. Which stage performance vibe matches you best?",
+        choices: [
+            { text: "Stable, beautiful vocals on a stage filled with flowers", member: "jisoo" },
+            { text: "A charismatic, powerful solo rap session in a chic outfit", member: "jennie" },
+            { text: "Strumming an acoustic guitar under a single warm spotlight", member: "rose" },
+            { text: "A high-energy, fast-paced dance break with laser lights", member: "lisa" }
+        ]
+    }
+];
+
+// Quiz state tracking
+let quizCurrentIndex = 0;
+let quizScores = { jisoo: 0, jennie: 0, rose: 0, lisa: 0 };
+
+// Initialize or reset the quiz state
+function initQuizState() {
+    quizCurrentIndex = 0;
+    quizScores = { jisoo: 0, jennie: 0, rose: 0, lisa: 0 };
+    
+    quizResultCard.classList.add('hidden');
+    quizActiveCard.classList.remove('hidden');
+    
+    renderQuizQuestion();
+}
+
+// Render the active question in the DOM
+function renderQuizQuestion() {
+    const question = QUIZ_QUESTIONS[quizCurrentIndex];
+    
+    // Update progress bar
+    quizQuestionNum.textContent = quizCurrentIndex + 1;
+    const progressPercent = Math.round(((quizCurrentIndex + 1) / QUIZ_QUESTIONS.length) * 100);
+    quizProgressText.textContent = `${progressPercent}%`;
+    quizProgressFill.style.width = `${progressPercent}%`;
+    
+    // Update question text
+    quizQuestionTitle.textContent = question.title;
+    
+    // Clear and build options buttons
+    quizOptionsContainer.innerHTML = '';
+    question.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option-btn';
+        btn.innerHTML = `
+            <span>${choice.text}</span>
+            <i class="fa-solid fa-angle-right" style="font-size: 0.85rem; opacity: 0.6;"></i>
+        `;
+        
+        btn.addEventListener('click', () => {
+            // Add score
+            quizScores[choice.member]++;
+            
+            // Move to next question or show result
+            if (quizCurrentIndex < QUIZ_QUESTIONS.length - 1) {
+                quizCurrentIndex++;
+                renderQuizQuestion();
+            } else {
+                showQuizResult();
+            }
+        });
+        
+        quizOptionsContainer.appendChild(btn);
+    });
+}
+
+// Display the computed personality result card
+function showQuizResult() {
+    quizActiveCard.classList.add('hidden');
+    quizResultCard.classList.remove('hidden');
+    
+    // Determine winner (highest score)
+    let winner = 'jisoo';
+    let maxScore = -1;
+    
+    // Deterministic tie-breaker check in order: jennie -> jisoo -> rose -> lisa
+    const members = ['jennie', 'jisoo', 'rose', 'lisa'];
+    members.forEach(member => {
+        if (quizScores[member] > maxScore) {
+            maxScore = quizScores[member];
+            winner = member;
+        }
+    });
+    
+    // Member profiles
+    const profiles = {
+        jisoo: {
+            name: "🐰 JISOO",
+            desc: "You are Jisoo! You are the stable, caring, and funny pillar of your group. You love classic aesthetics, books, and cafe-hopping. You show your affection through small gestures, have a great sense of humor (and dad jokes!), and keep a calm, positive head when things get tough.",
+            img: "quiz_jisoo.jpg"
+        },
+        jennie: {
+            name: "🐻 JENNIE",
+            desc: "You are Jennie! You are charismatic, stylish, and a true trendsetter. While you might seem cool and confident on the outside, you are incredibly sweet, soft-hearted, and protective of the people you love. You appreciate luxury, streetwear fashion, and coffee shops.",
+            img: "quiz_jennie.jpg"
+        },
+        rose: {
+            name: "🐿️ ROSÉ",
+            desc: "You are Rosé! You are deep, emotional, and artistic. You express yourself through music, art, and comfort writing. You have a warm, gentle soul, give the best hugs, and feel things deeply. You love vintage aesthetics, cozy sweaters, and acoustic playlists.",
+            img: "quiz_rose.jpg"
+        },
+        lisa: {
+            name: "🐥 LISA",
+            desc: "You are Lisa! You are the energetic, fun-loving mood-maker. Your bright personality fills the room with positive vibes, and you love learning new skills (like dancing!). You are brave, optimistic, and always stay young at heart, bringing high-energy and laughter to your friends.",
+            img: "quiz_lisa.jpg"
+        }
+    };
+    
+    const result = profiles[winner];
+    quizResultName.textContent = result.name;
+    quizResultDesc.textContent = result.desc;
+    
+    // Load result picture, fallback to placeholder if error/not uploaded
+    quizResultImg.src = result.img;
+    quizResultImg.onerror = () => {
+        quizResultImg.classList.add('hidden');
+        quizResultPlaceholder.classList.remove('hidden');
+    };
+    quizResultImg.onload = () => {
+        quizResultImg.classList.remove('hidden');
+        quizResultPlaceholder.classList.add('hidden');
+    };
+}
+
+// Opens the Share on X Viral Modal
+function openShareXModal(type = 'letter') {
+    if (!shareXModal) return;
+    shareXModal.classList.add('active');
+    
+    const btnSharePost = document.getElementById('btn-share-x-post');
+    if (!btnSharePost) return;
+    
+    // Unbind any previous click handlers to prevent duplicates
+    const newBtn = btnSharePost.cloneNode(true);
+    btnSharePost.parentNode.replaceChild(newBtn, btnSharePost);
+    
+    newBtn.addEventListener('click', () => {
+        let text = "";
+        if (type === 'letter') {
+            text = "hey, I've sealed my letters for BLACKPINK in the DearBlackpink Capsule, did you do yours?🖤💗";
+        } else {
+            text = "hey, I've shared my custom K-pop edits in the DearBlackpink Fan Media Showcase! check it out!🖤💗";
+        }
+        
+        const websiteUrl = "https://dearblackpink.vercel.app";
+        const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
+        
+        window.open(twitterIntentUrl, '_blank');
+        shareXModal.classList.remove('active');
+    });
 }
 
 // Save letter helper
-
 async function saveLetter(letter) {
     // Add to active local cache memory immediately for instant update
     if (loadedLetters) {
@@ -684,6 +961,7 @@ async function saveLetter(letter) {
     // Refresh letters progress bar counts
     fetchGlobalLettersCount();
 }
+
 // Display customized toast notification
 function showToast(message) {
     toastMessage.textContent = message;
@@ -739,7 +1017,6 @@ function startCountdownTracker() {
 }
 
 // Render Polaroid gallery
-// Render Polaroid gallery
 async function renderPolaroidGallery(forceFetch = false) {
     let customLetters = [];
     
@@ -769,6 +1046,7 @@ async function renderPolaroidGallery(forceFetch = false) {
 
     customLetters = loadedLetters;
     const allLetters = [...customLetters, ...SEED_LETTERS];
+    
     // Get active filter
     const activeFilterEl = document.querySelector('.btn-filter.active');
     const activeFilter = activeFilterEl ? activeFilterEl.dataset.filter : 'all';
@@ -778,6 +1056,13 @@ async function renderPolaroidGallery(forceFetch = false) {
     
     // Filter logic
     let filtered = allLetters.filter(letter => {
+        const config = parseStickerConfig(letter.sticker);
+        
+        // Exclude tree wishes from the Polaroid gallery
+        if (config.stamp === 'wish' || letter.to === 'Tree') {
+            return false;
+        }
+
         // Search query filter
         const matchQuery = 
             letter.from.toLowerCase().includes(query) || 
@@ -785,8 +1070,6 @@ async function renderPolaroidGallery(forceFetch = false) {
             letter.message.toLowerCase().includes(query);
             
         if (!matchQuery) return false;
-        
-        const config = parseStickerConfig(letter.sticker);
         
         // Tab category filter
         if (activeFilter === 'sent-by-me') {
@@ -1035,6 +1318,7 @@ function handleMediaFileSelection(file) {
     reader.readAsDataURL(file);
 }
 
+// Renders visual preview inside file dropzone
 function renderUploadPreview(dataUrl, type) {
     const previousMedia = dropzonePreview.querySelector('img, video');
     if (previousMedia) {
@@ -1057,6 +1341,7 @@ function renderUploadPreview(dataUrl, type) {
     dropzonePreview.classList.remove('hidden');
 }
 
+// Resets visual preview inside file dropzone
 function resetUploadPreview() {
     mediaFileInput.value = '';
     uploadedFileData = null;
@@ -1072,6 +1357,7 @@ function resetUploadPreview() {
     dropzonePrompt.classList.remove('hidden');
 }
 
+// Renders the fan creation edits grid
 async function renderMediaShowcase(forceFetch = false) {
     let customMedia = [];
     
@@ -1168,7 +1454,7 @@ async function renderMediaShowcase(forceFetch = false) {
     });
 }
 
-// Promise-based custom confirmation dialog
+// Instantly deletes media edits from cache and background database without prompt
 async function deleteMediaItem(id) {
     // 1. Instantly remove from local cached memory and re-render grid
     if (loadedMedia) {
@@ -1195,6 +1481,7 @@ async function deleteMediaItem(id) {
     showToast('Creation deleted.');
 }
 
+// Instantly deletes sealed wishes from cache and background database without prompt
 async function deleteLetterItem(id) {
     // 1. Instantly remove from local cached memory and re-render grid
     if (loadedLetters) {
@@ -1221,224 +1508,7 @@ async function deleteLetterItem(id) {
     showToast('Letter deleted successfully.');
     closeModal();
 }
-// Opens the Share on X Viral Modal
-function openShareXModal(type = 'letter') {
-    if (!shareXModal) return;
-    shareXModal.classList.add('active');
-    
-    const btnSharePost = document.getElementById('btn-share-x-post');
-    if (!btnSharePost) return;
-    
-    // Unbind any previous click handlers to prevent duplicates
-    const newBtn = btnSharePost.cloneNode(true);
-    btnSharePost.parentNode.replaceChild(newBtn, btnSharePost);
-    
-    newBtn.addEventListener('click', () => {
-        let text = "";
-        if (type === 'letter') {
-            text = "hey, I've sealed my letters for BLACKPINK in the DearBlackpink Capsule, did you do yours?🖤💗";
-        } else {
-            text = "hey, I've shared my custom K-pop edits in the DearBlackpink Fan Media Showcase! check it out!🖤💗";
-        }
-        
-        const websiteUrl = "https://dearblackpink.vercel.app";
-        const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
-        
-        window.open(twitterIntentUrl, '_blank');
-        shareXModal.classList.remove('active');
-    });
-}
 
-// ==========================================================================
-// 10-Question Personality Quiz Questions & Choices mapping
-// ==========================================================================
-const QUIZ_QUESTIONS = [
-    {
-        title: "1. What is your ideal weekend activity?",
-        choices: [
-            { text: "Exploring a cute bookshop or neighborhood cafe", member: "jisoo" },
-            { text: "Attending a fashion event or shopping downtown", member: "jennie" },
-            { text: "Strumming a guitar, singing, or painting at home", member: "rose" },
-            { text: "Learning a new dance choreography or playing arcade games", member: "lisa" }
-        ]
-    },
-    {
-        title: "2. Pick your favorite fashion aesthetic:",
-        choices: [
-            { text: "Classic, elegant, and preppy", member: "jisoo" },
-            { text: "Sleek, streetwear, and high-fashion luxury", member: "jennie" },
-            { text: "Bohemian, cozy knitwear, and vintage flowy pieces", member: "rose" },
-            { text: "Edgy, colorful, and bold accessories", member: "lisa" }
-        ]
-    },
-    {
-        title: "3. Choose your dream pet companion:",
-        choices: [
-            { text: "A cute, loyal puppy (like Dalgom!)", member: "jisoo" },
-            { text: "A sweet, fluffy cat that loves to cuddle", member: "jennie" },
-            { text: "A tiny aquarium fish or a sweet bird", member: "rose" },
-            { text: "A high-energy, playful puppy (like Love!)", member: "lisa" }
-        ]
-    },
-    {
-        title: "4. What is your typical role in a friend group?",
-        choices: [
-            { text: "The funny older sibling who cracks jokes and keeps peace", member: "jisoo" },
-            { text: "The trendsetter who coordinates the best places to go", member: "jennie" },
-            { text: "The emotional supporter who gives the warmest hugs", member: "rose" },
-            { text: "The active mood-maker who brings endless energy", member: "lisa" }
-        ]
-    },
-    {
-        title: "5. Select your favorite treat or beverage:",
-        choices: [
-            { text: "Sweet iced tea or a local fruit juice", member: "jisoo" },
-            { text: "A classic Iced Americano to stay sharp", member: "jennie" },
-            { text: "A warm, frothy vanilla latte or chamomile tea", member: "rose" },
-            { text: "A sweet strawberry milkshake or mango smoothie", member: "lisa" }
-        ]
-    },
-    {
-        title: "6. What kind of music playlist do you listen to most?",
-        choices: [
-            { text: "Classic retro pop and easy-listening acoustic tunes", member: "jisoo" },
-            { text: "Hip-hop, R&B, and modern synth beats", member: "jennie" },
-            { text: "Indie folk, acoustic guitar ballads, and soft soundtracks", member: "rose" },
-            { text: "High-energy dance pop, club hits, and global party tracks", member: "lisa" }
-        ]
-    },
-    {
-        title: "7. Pick your dream vacation destination:",
-        choices: [
-            { text: "Tokyo, Japan (cherry blossoms, old temples, and ramen)", member: "jisoo" },
-            { text: "Paris, France (art galleries, cafes, and fashion houses)", member: "jennie" },
-            { text: "London, UK (cozy parks, rainy streets, and musicals)", member: "rose" },
-            { text: "Hawaii, USA (surfing, hiking, and tropical beaches)", member: "lisa" }
-        ]
-    },
-    {
-        title: "8. Choose your signature color palette:",
-        choices: [
-            { text: "Soft lavender and pastel sky blue", member: "jisoo" },
-            { text: "Sleek charcoal black and pearl white", member: "jennie" },
-            { text: "Warm rose gold and champagne pink", member: "rose" },
-            { text: "Neon pink, bright yellow, and bold lime green", member: "lisa" }
-        ]
-    },
-    {
-        title: "9. How do you usually handle stress or pressure?",
-        choices: [
-            { text: "Stay calm, think logically, and crack a joke to ease the air", member: "jisoo" },
-            { text: "Take immediate control, solve it, and keep a cool head", member: "jennie" },
-            { text: "Let my emotions out, write, or listen to comfort music", member: "rose" },
-            { text: "Stay positive, call my friends, and laugh it off", member: "lisa" }
-        ]
-    },
-    {
-        title: "10. Which stage performance vibe matches you best?",
-        choices: [
-            { text: "Stable, beautiful vocals on a stage filled with flowers", member: "jisoo" },
-            { text: "A charismatic, powerful solo rap session in a chic outfit", member: "jennie" },
-            { text: "Strumming an acoustic guitar under a single warm spotlight", member: "rose" },
-            { text: "A high-energy, fast-paced dance break with laser lights", member: "lisa" }
-        ]
-    }
-];
-
-let quizCurrentIndex = 0;
-let quizScores = { jisoo: 0, jennie: 0, rose: 0, lisa: 0 };
-
-function initQuizState() {
-    quizCurrentIndex = 0;
-    quizScores = { jisoo: 0, jennie: 0, rose: 0, lisa: 0 };
-    if (quizResultCard) quizResultCard.classList.add('hidden');
-    if (quizActiveCard) quizActiveCard.classList.remove('hidden');
-    renderQuizQuestion();
-}
-
-function renderQuizQuestion() {
-    const question = QUIZ_QUESTIONS[quizCurrentIndex];
-    if (quizQuestionNum) quizQuestionNum.textContent = quizCurrentIndex + 1;
-    const progressPercent = Math.round(((quizCurrentIndex + 1) / QUIZ_QUESTIONS.length) * 100);
-    if (quizProgressText) quizProgressText.textContent = `${progressPercent}%`;
-    if (quizProgressFill) quizProgressFill.style.width = `${progressPercent}%`;
-    if (quizQuestionTitle) quizQuestionTitle.textContent = question.title;
-    if (quizOptionsContainer) {
-        quizOptionsContainer.innerHTML = '';
-        question.choices.forEach(choice => {
-            const btn = document.createElement('button');
-            btn.className = 'quiz-option-btn';
-            btn.innerHTML = `
-                <span>${choice.text}</span>
-                <i class="fa-solid fa-angle-right" style="font-size: 0.85rem; opacity: 0.6;"></i>
-            `;
-            btn.addEventListener('click', () => {
-                quizScores[choice.member]++;
-                if (quizCurrentIndex < QUIZ_QUESTIONS.length - 1) {
-                    quizCurrentIndex++;
-                    renderQuizQuestion();
-                } else {
-                    showQuizResult();
-                }
-            });
-            quizOptionsContainer.appendChild(btn);
-        });
-    }
-}
-
-function showQuizResult() {
-    if (quizActiveCard) quizActiveCard.classList.add('hidden');
-    if (quizResultCard) quizResultCard.classList.remove('hidden');
-    
-    let winner = 'jisoo';
-    let maxScore = -1;
-    const members = ['jennie', 'jisoo', 'rose', 'lisa'];
-    
-    members.forEach(member => {
-        if (quizScores[member] > maxScore) {
-            maxScore = quizScores[member];
-            winner = member;
-        }
-    });
-    
-    const profiles = {
-        jisoo: {
-            name: "🐰 JISOO",
-            desc: "You are Jisoo! You are the stable, caring, and funny pillar of your group. You love classic aesthetics, books, and cafe-hopping. You show your affection through small gestures, have a great sense of humor, and keep a calm, positive head when things get tough.",
-            img: "quiz_jisoo.jpg"
-        },
-        jennie: {
-            name: "🐻 JENNIE",
-            desc: "You are Jennie! You are charismatic, stylish, and a true trendsetter. While you might seem cool and confident on the outside, you are incredibly sweet, soft-hearted, and protective of the people you love. You appreciate luxury, streetwear fashion, and coffee shops.",
-            img: "quiz_jennie.jpg"
-        },
-        rose: {
-            name: "🐿️ ROSÉ",
-            desc: "You are Rosé! You are deep, emotional, and artistic. You express yourself through music, art, and comfort writing. You have a warm, gentle soul, give the best hugs, and feel things deeply. You love vintage aesthetics, cozy sweaters, and acoustic playlists.",
-            img: "quiz_rose.jpg"
-        },
-        lisa: {
-            name: "🐥 LISA",
-            desc: "You are Lisa! You are the energetic, fun-loving mood-maker. Your bright personality fills the room with positive vibes, and you love learning new skills (like dancing!). You are brave, optimistic, and always stay young at heart, bringing high-energy and laughter to your friends.",
-            img: "quiz_lisa.jpg"
-        }
-    };
-    
-    const result = profiles[winner];
-    if (quizResultName) quizResultName.textContent = result.name;
-    if (quizResultDesc) quizResultDesc.textContent = result.desc;
-    if (quizResultImg) {
-        quizResultImg.src = result.img;
-        quizResultImg.onerror = () => {
-            quizResultImg.classList.add('hidden');
-            if (quizResultPlaceholder) quizResultPlaceholder.classList.remove('hidden');
-        };
-        quizResultImg.onload = () => {
-            quizResultImg.classList.remove('hidden');
-            if (quizResultPlaceholder) quizResultPlaceholder.classList.add('hidden');
-        };
-    }
-}
 // ==========================================================================
 // BLACKPINK 10th Anniversary specialized helper logic
 // ==========================================================================
@@ -1603,13 +1673,15 @@ async function fetchGlobalLettersCount() {
     try {
         const { count, error } = await _supabase
             .from('letters')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .neq('recipient', 'Tree');
             
         if (error) throw error;
         updateLettersProgress(count);
     } catch (e) {
         console.error("Failed to query global letters count:", e);
-        const localLetters = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
+        const localLetters = (JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [])
+            .filter(item => item.to !== 'Tree');
         const count = localLetters.length + SEED_LETTERS.length;
         updateLettersProgress(count);
     }
@@ -1631,3 +1703,51 @@ function updateLettersProgress(count) {
     if (cdProgressFill) cdProgressFill.style.width = `${percentage}%`;
     if (cdCountText) cdCountText.textContent = `${count.toLocaleString()} / ${target.toLocaleString()}`;
 }
+
+
+// ==========================================================================
+// PWA INSTALL LOGIC & SERVICE WORKER REGISTRATION
+// ==========================================================================
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('PWA Service Worker registered successfully!', reg.scope);
+            })
+            .catch(err => {
+                console.error('PWA Service Worker registration failed:', err);
+            });
+    });
+
+    // Reload page when service worker updates and takes control
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+        }
+    });
+}
+
+// Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent standard browser install prompt banner
+    e.preventDefault();
+    // Cache the event prompt
+    deferredPrompt = e;
+    // Show the Install Button in the header
+    if (btnInstallApp) {
+        btnInstallApp.classList.remove('hidden');
+    }
+});
+
+// Hide Install Button on successful installation
+window.addEventListener('appinstalled', (evt) => {
+    console.log('App was successfully installed on the home screen!');
+    if (btnInstallApp) {
+        btnInstallApp.classList.add('hidden');
+    }
+    showToast("Dear BLACKPINK installed on your home screen! 🖤💗");
+});
