@@ -1386,6 +1386,13 @@ body {
 
 /* Responsive adjustments */
 @media(max-width: 600px) {
+
+       .sticker-options {
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+    }
+   
     .app-header {
         padding: 16px;
         flex-wrap: wrap;
@@ -2254,3 +2261,10 @@ body.dark-mode .input-wrapper input:focus {
     border-color: var(--color-primary);
 }
 
+/* BLINK Quiz Option Hover Translate */
+.quiz-option-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    transform: translateX(6px);
+}
