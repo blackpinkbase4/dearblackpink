@@ -27,8 +27,11 @@ const viewWrite = document.getElementById('view-write');
 const viewCountdown = document.getElementById('view-countdown');
 const viewGallery = document.getElementById('view-gallery');
 const viewMediaHub = document.getElementById('view-media-hub');
+const viewQuiz = document.getElementById('view-quiz'); 
 const navCapsule = document.getElementById('nav-capsule');
 const navMediaHub = document.getElementById('nav-media-hub');
+const navQuiz = document.getElementById('nav-quiz'); 
+const shareXModal = document.getElementById('share-x-modal'); 
 
 const gatekeeperForm = document.getElementById('gatekeeper-form');
 const senderNicknameInput = document.getElementById('sender-nickname');
@@ -150,6 +153,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Register Event Listeners
     setupEventListeners();
+
+        // Quiz restart button listener
+    const btnQuizRestart = document.getElementById('btn-quiz-restart');
+    if (btnQuizRestart) {
+        btnQuizRestart.addEventListener('click', () => {
+            initQuizState();
+        });
+    }
+
+    // Share Modal close buttons
+    const btnShareXClose = document.getElementById('btn-share-x-close');
+    if (btnShareXClose) {
+        btnShareXClose.addEventListener('click', () => {
+            shareXModal.classList.remove('active');
+        });
+    }
+
+    if (shareXModal) {
+        shareXModal.addEventListener('click', (e) => {
+            if (e.target === shareXModal) {
+                shareXModal.classList.remove('active');
+            }
+        });
+    }
 });
 
 // Navigation logic based on date and bypass state
@@ -171,7 +198,7 @@ function navigateInitialView() {
 }
 
 function switchView(targetView) {
-    if (targetView !== viewMediaHub) {
+    if (targetView !== viewMediaHub && targetView !== viewQuiz) {
         currentCapsuleView = targetView;
     }
 
@@ -359,7 +386,7 @@ function setupEventListeners() {
             timestamp: Date.now()
         };
 
-        saveLetter(newLetter);
+               saveLetter(newLetter);
         
         // Show success popup animation / screen transition
         if (isVaultUnlocked()) {
@@ -371,6 +398,11 @@ function setupEventListeners() {
             // Go to countdown page and show the banner
             successBanner.style.display = 'flex';
             switchView(viewCountdown);
+            
+            // Trigger the Share on X popup after 1.5 seconds so they can see the countdown and success banner first!
+            setTimeout(() => {
+                openShareXModal('letter');
+            }, 1500);
         }
     });
 
@@ -430,18 +462,20 @@ function setupEventListeners() {
         });
     }
 
-    // Navigation Switcher Tabs
-    navCapsule.addEventListener('click', () => {
+        // Helper to toggle active state in header navigation
+    function updateHeaderNavState(activeLink) {
+        navCapsule.classList.remove('active');
+        navQuiz.classList.remove('active');
         navMediaHub.classList.remove('active');
-        navCapsule.classList.add('active');
-        
-        // Show music player widget on Time Capsule page
+        activeLink.classList.add('active');
+    }
+
+    // Helper to restore music on switching back to a music-supported tab
+    function restoreMusicIfSwitchingBack() {
         const playerWidget = document.getElementById('music-player');
         if (playerWidget) {
             playerWidget.style.display = 'flex';
         }
-        
-        // Resume music if it was playing before the switch
         const audio = document.getElementById('ambient-audio');
         const playBtn = document.getElementById('btn-player-play');
         const vinyl = document.getElementById('vinyl-disc');
@@ -451,13 +485,24 @@ function setupEventListeners() {
                 if (vinyl) vinyl.classList.add('playing');
             }).catch(e => console.log("Failed to autoplay Stay song:", e));
         }
-        
+    }
+
+    // Navigation Switcher Tabs
+    navCapsule.addEventListener('click', () => {
+        updateHeaderNavState(navCapsule);
+        restoreMusicIfSwitchingBack();
         switchView(currentCapsuleView);
     });
 
+    navQuiz.addEventListener('click', () => {
+        updateHeaderNavState(navQuiz);
+        restoreMusicIfSwitchingBack();
+        switchView(viewQuiz);
+        initQuizState(); // Reset and load quiz when tab clicked
+    });
+
     navMediaHub.addEventListener('click', () => {
-        navCapsule.classList.remove('active');
-        navMediaHub.classList.add('active');
+        updateHeaderNavState(navMediaHub);
         
         // Pause music if it's currently playing
         const audio = document.getElementById('ambient-audio');
@@ -481,7 +526,6 @@ function setupEventListeners() {
         
         switchView(viewMediaHub);
     });
-
     // File Drag and Drop / Selection listeners
     mediaDropzone.addEventListener('click', () => {
         mediaFileInput.click();
@@ -573,12 +617,19 @@ function setupEventListeners() {
             }
 
             // Reset Form
+                       // Reset Form
             mediaCaptionInput.value = '';
             resetUploadPreview();
             showToast('Creation shared successfully!');
             
             // Reload Grid
-            await renderMediaShowcase();
+            loadedMedia = null;
+            await renderMediaShowcase(true);
+
+            // Trigger the Share on X popup for media edits after 1.5 seconds so they can see the success toast first!
+            setTimeout(() => {
+                openShareXModal('media');
+            }, 1500);
         } catch (error) {
             console.error('Upload failed:', error);
             showToast('Upload failed! Please check your file size or database connection.');
@@ -1169,6 +1220,224 @@ async function deleteLetterItem(id) {
     
     showToast('Letter deleted successfully.');
     closeModal();
+}
+// Opens the Share on X Viral Modal
+function openShareXModal(type = 'letter') {
+    if (!shareXModal) return;
+    shareXModal.classList.add('active');
+    
+    const btnSharePost = document.getElementById('btn-share-x-post');
+    if (!btnSharePost) return;
+    
+    // Unbind any previous click handlers to prevent duplicates
+    const newBtn = btnSharePost.cloneNode(true);
+    btnSharePost.parentNode.replaceChild(newBtn, btnSharePost);
+    
+    newBtn.addEventListener('click', () => {
+        let text = "";
+        if (type === 'letter') {
+            text = "hey, I've sealed my letters for BLACKPINK in the DearBlackpink Capsule, did you do yours?🖤💗";
+        } else {
+            text = "hey, I've shared my custom K-pop edits in the DearBlackpink Fan Media Showcase! check it out!🖤💗";
+        }
+        
+        const websiteUrl = "https://dearblackpink.vercel.app";
+        const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
+        
+        window.open(twitterIntentUrl, '_blank');
+        shareXModal.classList.remove('active');
+    });
+}
+
+// ==========================================================================
+// 10-Question Personality Quiz Questions & Choices mapping
+// ==========================================================================
+const QUIZ_QUESTIONS = [
+    {
+        title: "1. What is your ideal weekend activity?",
+        choices: [
+            { text: "Exploring a cute bookshop or neighborhood cafe", member: "jisoo" },
+            { text: "Attending a fashion event or shopping downtown", member: "jennie" },
+            { text: "Strumming a guitar, singing, or painting at home", member: "rose" },
+            { text: "Learning a new dance choreography or playing arcade games", member: "lisa" }
+        ]
+    },
+    {
+        title: "2. Pick your favorite fashion aesthetic:",
+        choices: [
+            { text: "Classic, elegant, and preppy", member: "jisoo" },
+            { text: "Sleek, streetwear, and high-fashion luxury", member: "jennie" },
+            { text: "Bohemian, cozy knitwear, and vintage flowy pieces", member: "rose" },
+            { text: "Edgy, colorful, and bold accessories", member: "lisa" }
+        ]
+    },
+    {
+        title: "3. Choose your dream pet companion:",
+        choices: [
+            { text: "A cute, loyal puppy (like Dalgom!)", member: "jisoo" },
+            { text: "A sweet, fluffy cat that loves to cuddle", member: "jennie" },
+            { text: "A tiny aquarium fish or a sweet bird", member: "rose" },
+            { text: "A high-energy, playful puppy (like Love!)", member: "lisa" }
+        ]
+    },
+    {
+        title: "4. What is your typical role in a friend group?",
+        choices: [
+            { text: "The funny older sibling who cracks jokes and keeps peace", member: "jisoo" },
+            { text: "The trendsetter who coordinates the best places to go", member: "jennie" },
+            { text: "The emotional supporter who gives the warmest hugs", member: "rose" },
+            { text: "The active mood-maker who brings endless energy", member: "lisa" }
+        ]
+    },
+    {
+        title: "5. Select your favorite treat or beverage:",
+        choices: [
+            { text: "Sweet iced tea or a local fruit juice", member: "jisoo" },
+            { text: "A classic Iced Americano to stay sharp", member: "jennie" },
+            { text: "A warm, frothy vanilla latte or chamomile tea", member: "rose" },
+            { text: "A sweet strawberry milkshake or mango smoothie", member: "lisa" }
+        ]
+    },
+    {
+        title: "6. What kind of music playlist do you listen to most?",
+        choices: [
+            { text: "Classic retro pop and easy-listening acoustic tunes", member: "jisoo" },
+            { text: "Hip-hop, R&B, and modern synth beats", member: "jennie" },
+            { text: "Indie folk, acoustic guitar ballads, and soft soundtracks", member: "rose" },
+            { text: "High-energy dance pop, club hits, and global party tracks", member: "lisa" }
+        ]
+    },
+    {
+        title: "7. Pick your dream vacation destination:",
+        choices: [
+            { text: "Tokyo, Japan (cherry blossoms, old temples, and ramen)", member: "jisoo" },
+            { text: "Paris, France (art galleries, cafes, and fashion houses)", member: "jennie" },
+            { text: "London, UK (cozy parks, rainy streets, and musicals)", member: "rose" },
+            { text: "Hawaii, USA (surfing, hiking, and tropical beaches)", member: "lisa" }
+        ]
+    },
+    {
+        title: "8. Choose your signature color palette:",
+        choices: [
+            { text: "Soft lavender and pastel sky blue", member: "jisoo" },
+            { text: "Sleek charcoal black and pearl white", member: "jennie" },
+            { text: "Warm rose gold and champagne pink", member: "rose" },
+            { text: "Neon pink, bright yellow, and bold lime green", member: "lisa" }
+        ]
+    },
+    {
+        title: "9. How do you usually handle stress or pressure?",
+        choices: [
+            { text: "Stay calm, think logically, and crack a joke to ease the air", member: "jisoo" },
+            { text: "Take immediate control, solve it, and keep a cool head", member: "jennie" },
+            { text: "Let my emotions out, write, or listen to comfort music", member: "rose" },
+            { text: "Stay positive, call my friends, and laugh it off", member: "lisa" }
+        ]
+    },
+    {
+        title: "10. Which stage performance vibe matches you best?",
+        choices: [
+            { text: "Stable, beautiful vocals on a stage filled with flowers", member: "jisoo" },
+            { text: "A charismatic, powerful solo rap session in a chic outfit", member: "jennie" },
+            { text: "Strumming an acoustic guitar under a single warm spotlight", member: "rose" },
+            { text: "A high-energy, fast-paced dance break with laser lights", member: "lisa" }
+        ]
+    }
+];
+
+let quizCurrentIndex = 0;
+let quizScores = { jisoo: 0, jennie: 0, rose: 0, lisa: 0 };
+
+function initQuizState() {
+    quizCurrentIndex = 0;
+    quizScores = { jisoo: 0, jennie: 0, rose: 0, lisa: 0 };
+    if (quizResultCard) quizResultCard.classList.add('hidden');
+    if (quizActiveCard) quizActiveCard.classList.remove('hidden');
+    renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+    const question = QUIZ_QUESTIONS[quizCurrentIndex];
+    if (quizQuestionNum) quizQuestionNum.textContent = quizCurrentIndex + 1;
+    const progressPercent = Math.round(((quizCurrentIndex + 1) / QUIZ_QUESTIONS.length) * 100);
+    if (quizProgressText) quizProgressText.textContent = `${progressPercent}%`;
+    if (quizProgressFill) quizProgressFill.style.width = `${progressPercent}%`;
+    if (quizQuestionTitle) quizQuestionTitle.textContent = question.title;
+    if (quizOptionsContainer) {
+        quizOptionsContainer.innerHTML = '';
+        question.choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option-btn';
+            btn.innerHTML = `
+                <span>${choice.text}</span>
+                <i class="fa-solid fa-angle-right" style="font-size: 0.85rem; opacity: 0.6;"></i>
+            `;
+            btn.addEventListener('click', () => {
+                quizScores[choice.member]++;
+                if (quizCurrentIndex < QUIZ_QUESTIONS.length - 1) {
+                    quizCurrentIndex++;
+                    renderQuizQuestion();
+                } else {
+                    showQuizResult();
+                }
+            });
+            quizOptionsContainer.appendChild(btn);
+        });
+    }
+}
+
+function showQuizResult() {
+    if (quizActiveCard) quizActiveCard.classList.add('hidden');
+    if (quizResultCard) quizResultCard.classList.remove('hidden');
+    
+    let winner = 'jisoo';
+    let maxScore = -1;
+    const members = ['jennie', 'jisoo', 'rose', 'lisa'];
+    
+    members.forEach(member => {
+        if (quizScores[member] > maxScore) {
+            maxScore = quizScores[member];
+            winner = member;
+        }
+    });
+    
+    const profiles = {
+        jisoo: {
+            name: "🐰 JISOO",
+            desc: "You are Jisoo! You are the stable, caring, and funny pillar of your group. You love classic aesthetics, books, and cafe-hopping. You show your affection through small gestures, have a great sense of humor, and keep a calm, positive head when things get tough.",
+            img: "quiz_jisoo.jpg"
+        },
+        jennie: {
+            name: "🐻 JENNIE",
+            desc: "You are Jennie! You are charismatic, stylish, and a true trendsetter. While you might seem cool and confident on the outside, you are incredibly sweet, soft-hearted, and protective of the people you love. You appreciate luxury, streetwear fashion, and coffee shops.",
+            img: "quiz_jennie.jpg"
+        },
+        rose: {
+            name: "🐿️ ROSÉ",
+            desc: "You are Rosé! You are deep, emotional, and artistic. You express yourself through music, art, and comfort writing. You have a warm, gentle soul, give the best hugs, and feel things deeply. You love vintage aesthetics, cozy sweaters, and acoustic playlists.",
+            img: "quiz_rose.jpg"
+        },
+        lisa: {
+            name: "🐥 LISA",
+            desc: "You are Lisa! You are the energetic, fun-loving mood-maker. Your bright personality fills the room with positive vibes, and you love learning new skills (like dancing!). You are brave, optimistic, and always stay young at heart, bringing high-energy and laughter to your friends.",
+            img: "quiz_lisa.jpg"
+        }
+    };
+    
+    const result = profiles[winner];
+    if (quizResultName) quizResultName.textContent = result.name;
+    if (quizResultDesc) quizResultDesc.textContent = result.desc;
+    if (quizResultImg) {
+        quizResultImg.src = result.img;
+        quizResultImg.onerror = () => {
+            quizResultImg.classList.add('hidden');
+            if (quizResultPlaceholder) quizResultPlaceholder.classList.remove('hidden');
+        };
+        quizResultImg.onload = () => {
+            quizResultImg.classList.remove('hidden');
+            if (quizResultPlaceholder) quizResultPlaceholder.classList.add('hidden');
+        };
+    }
 }
 // ==========================================================================
 // BLACKPINK 10th Anniversary specialized helper logic
