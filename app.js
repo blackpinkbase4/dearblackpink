@@ -3,9 +3,9 @@ const SUPABASE_URL = 'https://bmrabjysahblnosnpqia.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcmFianlzYWhibG5vc25wcWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTcyODYsImV4cCI6MjA5Nzc3MzI4Nn0.Igx7yAd98DyTqPxZmGtl-QxdIO0TW3_YrDjpr-swhjo';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Target Date: August 8, 2026, at 12:00 AM Midnight (local time)
-// Month index is 0-indexed: 7 = August
-const TARGET_DATE = new Date(2026, 7, 8, 0, 0, 0);
+// Target Date: August 8, 2026, at 12:00 AM Midnight KST (Korean Standard Time)
+// 12:00 AM KST corresponds to 3:00 PM UTC on August 7th
+const TARGET_DATE = new Date("2026-08-07T15:00:00Z");
 
 // App State
 let currentUser = {
