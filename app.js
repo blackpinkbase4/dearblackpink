@@ -12,6 +12,8 @@ let currentUser = {
     sender: '',
     recipient: ''
 };
+let loadedLetters = null;
+let loadedMedia = null;
 
 // Initial Seed Letters (pre-populated to make the vault feel alive)
 const SEED_LETTERS = [];
@@ -144,7 +146,7 @@ window.addEventListener('DOMContentLoaded', () => {
     navigateInitialView();
 
     // Render media list
-    renderMediaShowcase();
+    renderMediaShowcase(true);
 
     // Register Event Listeners
     setupEventListeners();
@@ -162,7 +164,7 @@ function isVaultUnlocked() {
 function navigateInitialView() {
     if (isVaultUnlocked()) {
         switchView(viewGallery);
-        renderPolaroidGallery();
+        renderPolaroidGallery(true);
     } else {
         switchView(viewGatekeeper);
     }
@@ -588,7 +590,21 @@ function setupEventListeners() {
 }
 
 // Save letter helper
+
 async function saveLetter(letter) {
+    // Add to active local cache memory immediately for instant update
+    if (loadedLetters) {
+        loadedLetters.unshift({
+            id: letter.id,
+            from: letter.from,
+            to: letter.to,
+            message: letter.message,
+            sticker: letter.sticker,
+            timestamp: letter.timestamp
+        });
+    }
+
+    // Save to database in background
     try {
         const { error } = await _supabase
             .from('letters')
@@ -617,7 +633,6 @@ async function saveLetter(letter) {
     // Refresh letters progress bar counts
     fetchGlobalLettersCount();
 }
-
 // Display customized toast notification
 function showToast(message) {
     toastMessage.textContent = message;
@@ -673,34 +688,36 @@ function startCountdownTracker() {
 }
 
 // Render Polaroid gallery
-async function renderPolaroidGallery() {
-    polaroidGrid.innerHTML = '<div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 40px; font-weight: 600; color: var(--color-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Retrieving letters from vault...</div>';
-    
-    // Fetch custom letters from Supabase Database
+// Render Polaroid gallery
+async function renderPolaroidGallery(forceFetch = false) {
     let customLetters = [];
-    try {
-        const { data, error } = await _supabase
-            .from('letters')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        customLetters = data.map(item => ({
-            id: item.id.toString(),
-            from: item.sender,
-            to: item.recipient,
-            message: item.message,
-            sticker: item.sticker,
-            timestamp: new Date(item.created_at).getTime()
-        }));
-    } catch (e) {
-        console.error('Supabase fetch letters failed, falling back to local:', e);
-        customLetters = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
+    
+    if (forceFetch || !loadedLetters) {
+        polaroidGrid.innerHTML = '<div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 40px; font-weight: 600; color: var(--color-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Retrieving letters from vault...</div>';
+        try {
+            const { data, error } = await _supabase
+                .from('letters')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            loadedLetters = data.map(item => ({
+                id: item.id.toString(),
+                from: item.sender,
+                to: item.recipient,
+                message: item.message,
+                sticker: item.sticker,
+                timestamp: new Date(item.created_at).getTime()
+            }));
+        } catch (e) {
+            console.error('Supabase fetch letters failed, falling back to local:', e);
+            loadedLetters = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
+        }
     }
 
+    customLetters = loadedLetters;
     const allLetters = [...customLetters, ...SEED_LETTERS];
-    
     // Get active filter
     const activeFilterEl = document.querySelector('.btn-filter.active');
     const activeFilter = activeFilterEl ? activeFilterEl.dataset.filter : 'all';
@@ -1004,32 +1021,34 @@ function resetUploadPreview() {
     dropzonePrompt.classList.remove('hidden');
 }
 
-async function renderMediaShowcase() {
-    mediaGrid.innerHTML = '<div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 40px; font-weight: 600; color: var(--color-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading shared edits...</div>';
-    
-    // Fetch custom creations from Supabase Database
+async function renderMediaShowcase(forceFetch = false) {
     let customMedia = [];
-    try {
-        const { data, error } = await _supabase
-            .from('media')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        customMedia = data.map(item => ({
-            id: item.id.toString(),
-            author: item.author,
-            caption: item.caption,
-            fileData: item.file_url,
-            fileType: item.file_type,
-            timestamp: new Date(item.created_at).getTime()
-        }));
-    } catch (e) {
-        console.error('Supabase fetch media failed, falling back to local:', e);
-        customMedia = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
+    
+    if (forceFetch || !loadedMedia) {
+        mediaGrid.innerHTML = '<div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 40px; font-weight: 600; color: var(--color-text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading shared edits...</div>';
+        try {
+            const { data, error } = await _supabase
+                .from('media')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            loadedMedia = data.map(item => ({
+                id: item.id.toString(),
+                author: item.author,
+                caption: item.caption,
+                fileData: item.file_url,
+                fileType: item.file_type,
+                timestamp: new Date(item.created_at).getTime()
+            }));
+        } catch (e) {
+            console.error('Supabase fetch media failed, falling back to local:', e);
+            loadedMedia = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
+        }
     }
 
+    customMedia = loadedMedia;
     const allMedia = [...customMedia, ...SEED_MEDIA];
 
     totalMediaCount.innerHTML = `<i class="fa-solid fa-photo-film"></i> ${allMedia.length} Creation${allMedia.length === 1 ? '' : 's'} Shared`;
@@ -1098,65 +1117,92 @@ async function renderMediaShowcase() {
     });
 }
 
-async function deleteMediaItem(id) {
-    if (confirm('Are you sure you want to delete this creation?')) {
-        let deleted = false;
+// Promise-based custom confirmation dialog
+function showCustomConfirm(message, confirmText = "Delete") {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const msgEl = document.getElementById('confirm-message');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+        const okBtn = document.getElementById('confirm-ok-btn');
         
-        // Try deleting from Supabase Database
+        msgEl.textContent = message;
+        okBtn.textContent = confirmText;
+        
+        modal.classList.add('active');
+        
+        function cleanup(result) {
+            modal.classList.remove('active');
+            cancelBtn.removeEventListener('click', onCancel);
+            okBtn.removeEventListener('click', onOk);
+            resolve(result);
+        }
+        
+        function onCancel() { cleanup(false); }
+        function onOk() { cleanup(true); }
+        
+        cancelBtn.addEventListener('click', onCancel);
+        okBtn.addEventListener('click', onOk);
+    });
+}
+
+async function deleteMediaItem(id) {
+    const confirmed = await showCustomConfirm('Are you sure you want to delete this creation?');
+    if (confirmed) {
+        // 1. Instantly remove from local cached memory and re-render grid
+        if (loadedMedia) {
+            loadedMedia = loadedMedia.filter(item => item.id !== id);
+        }
+        renderMediaShowcase(false); // fast re-render!
+        
+        // 2. Perform background delete query to database
         try {
             const { error } = await _supabase
                 .from('media')
                 .delete()
                 .eq('id', id);
-            
             if (error) throw error;
-            deleted = true;
         } catch (e) {
             console.error('Failed to delete from database:', e);
         }
 
-        if (!deleted) {
-            // Local fallback deletion
-            let mediaList = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
-            mediaList = mediaList.filter(item => item.id !== id);
-            localStorage.setItem('polaroid_capsule_media', JSON.stringify(mediaList));
-        }
+        // 3. Sync local fallback copy in parallel
+        let mediaList = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
+        mediaList = mediaList.filter(item => item.id !== id);
+        localStorage.setItem('polaroid_capsule_media', JSON.stringify(mediaList));
         
-        await renderMediaShowcase();
         showToast('Creation deleted.');
     }
 }
 
 async function deleteLetterItem(id) {
-    if (confirm('Are you sure you want to delete this sealed letter?')) {
-        let deleted = false;
+    const confirmed = await showCustomConfirm('Are you sure you want to delete this sealed letter?');
+    if (confirmed) {
+        // 1. Instantly remove from local cached memory and re-render grid
+        if (loadedLetters) {
+            loadedLetters = loadedLetters.filter(item => item.id !== id);
+        }
+        renderPolaroidGallery(false); // fast re-render!
         
-        // Try deleting from Supabase Database
+        // 2. Perform background delete query to database
         try {
             const { error } = await _supabase
                 .from('letters')
                 .delete()
                 .eq('id', id);
-            
             if (error) throw error;
-            deleted = true;
         } catch (e) {
             console.error('Failed to delete letter from database:', e);
         }
 
-        if (!deleted) {
-            // Local fallback deletion
-            let lettersList = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
-            lettersList = lettersList.filter(item => item.id !== id);
-            localStorage.setItem('polaroid_capsule_letters', JSON.stringify(lettersList));
-        }
+        // 3. Sync local fallback copy in parallel
+        let lettersList = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
+        lettersList = lettersList.filter(item => item.id !== id);
+        localStorage.setItem('polaroid_capsule_letters', JSON.stringify(lettersList));
         
-        await renderPolaroidGallery();
         showToast('Letter deleted successfully.');
         closeModal();
     }
 }
-
 // ==========================================================================
 // BLACKPINK 10th Anniversary specialized helper logic
 // ==========================================================================
