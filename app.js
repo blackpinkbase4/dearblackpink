@@ -8,7 +8,6 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TARGET_DATE = new Date("2026-08-07T15:00:00Z");
 
 // App State
-// App State
 let currentUser = {
     sender: '',
     recipient: ''
@@ -438,7 +437,7 @@ function setupEventListeners() {
         }
     });
 
-       // Search input typing
+    // Search input typing
     gallerySearch.addEventListener('input', () => {
         visibleLettersCount = lettersPerPage;
         renderPolaroidGallery();
@@ -603,7 +602,6 @@ function setupEventListeners() {
         }
 
         // Disable button during upload
-            // Disable button during upload
         const submitBtn = mediaUploadForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -670,6 +668,7 @@ function setupEventListeners() {
             
             // Reload Grid
             loadedMedia = null;
+            visibleMediaCount = mediaPerPage;
             await renderMediaShowcase(true);
 
             // Trigger the Share on X popup for media edits after 1.5 seconds so they can see the success toast first!
@@ -691,18 +690,32 @@ function setupEventListeners() {
     });
 
     // Share Modal close buttons
-    const btnShareXClose = document.getElementById('btn-share-x-close');
-    if (btnShareXClose) {
-        btnShareXClose.addEventListener('click', () => {
+    btnShareXClose.addEventListener('click', () => {
+        shareXModal.classList.remove('active');
+    });
+
+    shareXModal.addEventListener('click', (e) => {
+        if (e.target === shareXModal) {
             shareXModal.classList.remove('active');
+        }
+    });
+
+    // Pagination "Load More" click listeners
+    const btnLoadMoreLetters = document.getElementById('btn-load-more-letters');
+    if (btnLoadMoreLetters) {
+        btnLoadMoreLetters.addEventListener('click', () => {
+            showToast('Loading more Polaroids...');
+            visibleLettersCount += lettersPerPage;
+            renderPolaroidGallery(false);
         });
     }
 
-    if (shareXModal) {
-        shareXModal.addEventListener('click', (e) => {
-            if (e.target === shareXModal) {
-                shareXModal.classList.remove('active');
-            }
+    const btnLoadMoreMedia = document.getElementById('btn-load-more-media');
+    if (btnLoadMoreMedia) {
+        btnLoadMoreMedia.addEventListener('click', () => {
+            showToast('Loading more creations...');
+            visibleMediaCount += mediaPerPage;
+            renderMediaShowcase(false);
         });
     }
 }
@@ -917,13 +930,11 @@ function showQuizResult() {
 }
 
 // Opens the Share on X Viral Modal
-// Opens the Share on X Viral Modal
 function openShareXModal(type = 'letter') {
-    if (!shareXModal) return;
     shareXModal.classList.add('active');
     
+    // Set up X sharing link handler
     const btnSharePost = document.getElementById('btn-share-x-post');
-    if (!btnSharePost) return;
     
     // Unbind any previous click handlers to prevent duplicates
     const newBtn = btnSharePost.cloneNode(true);
@@ -954,7 +965,7 @@ function openShareXModal(type = 'letter') {
                     });
             }
             shareXModal.classList.remove('active');
-            return; // STOP HERE to prevent browser redirect crash inside X app
+            return;
         }
         
         // Copy to clipboard as a fallback so they can paste it if deep linking fails
@@ -984,6 +995,7 @@ function openShareXModal(type = 'letter') {
         }, 800);
     });
 }
+
 // Save letter helper
 async function saveLetter(letter) {
     // Add to active local cache memory immediately for instant update
@@ -1151,7 +1163,6 @@ async function renderPolaroidGallery(forceFetch = false) {
     });
 
     // Update statistics badge count
-       // Update statistics badge count
     totalLettersCount.innerHTML = `<i class="fa-solid fa-images"></i> ${filtered.length} Polaroid${filtered.length === 1 ? '' : 's'} Sealed`;
 
     const btnLoadMoreLetters = document.getElementById('btn-load-more-letters');
@@ -1182,7 +1193,6 @@ async function renderPolaroidGallery(forceFetch = false) {
         polaroidCard.className = `polaroid skin-${config.skin}`;
         
         // Random slight rotation to create realistic physical layout
-        // Generating deterministic seed rotation based on ID to avoid fluttering on redraw
         const rotationAngle = getRotationForId(letter.id);
         polaroidCard.style.transform = `rotate(${rotationAngle}deg)`;
 
@@ -1257,7 +1267,6 @@ function getRotationForId(id) {
     return Number(angle.toFixed(1));
 }
 
-// Helper to escape HTML characters
 // Helper to escape HTML characters
 function escapeHTML(str) {
     const p = document.createElement('p');
@@ -1454,7 +1463,6 @@ function handleMediaFileSelection(file) {
     reader.readAsDataURL(file);
 }
 
-// Renders visual preview inside file dropzone
 function renderUploadPreview(dataUrl, type) {
     const previousMedia = dropzonePreview.querySelector('img, video');
     if (previousMedia) {
@@ -1477,7 +1485,6 @@ function renderUploadPreview(dataUrl, type) {
     dropzonePreview.classList.remove('hidden');
 }
 
-// Resets visual preview inside file dropzone
 function resetUploadPreview() {
     mediaFileInput.value = '';
     uploadedFileData = null;
@@ -1493,7 +1500,6 @@ function resetUploadPreview() {
     dropzonePrompt.classList.remove('hidden');
 }
 
-// Renders the fan creation edits grid
 async function renderMediaShowcase(forceFetch = false) {
     let customMedia = [];
     
@@ -1515,6 +1521,7 @@ async function renderMediaShowcase(forceFetch = false) {
                 fileType: item.file_type,
                 timestamp: new Date(item.created_at).getTime()
             }));
+            console.log('Successfully mapped loadedMedia! Count:', loadedMedia.length);
         } catch (e) {
             console.error('Supabase fetch media failed, falling back to local:', e);
             loadedMedia = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
@@ -1524,7 +1531,7 @@ async function renderMediaShowcase(forceFetch = false) {
     customMedia = loadedMedia;
     const allMedia = [...customMedia, ...SEED_MEDIA];
 
-      totalMediaCount.innerHTML = `<i class="fa-solid fa-photo-film"></i> ${allMedia.length} Creation${allMedia.length === 1 ? '' : 's'} Shared`;
+    totalMediaCount.innerHTML = `<i class="fa-solid fa-photo-film"></i> ${allMedia.length} Creation${allMedia.length === 1 ? '' : 's'} Shared`;
 
     const btnLoadMoreMedia = document.getElementById('btn-load-more-media');
     if (allMedia.length > visibleMediaCount) {
@@ -1562,7 +1569,6 @@ async function renderMediaShowcase(forceFetch = false) {
 
         const isAuthorMe = currentUser.sender && item.author.toLowerCase() === currentUser.sender.toLowerCase();
         const isAdmin = localStorage.getItem('capsule_simulated_bypass') === 'true';
-        // Check if it is a custom database item (numeric string ids or uuid) vs seed item (seed-media-X)
         const isSeedItem = item.id.startsWith('seed-media-');
         const showDeleteBtn = (isAuthorMe || isAdmin) && !isSeedItem; 
         
@@ -1600,15 +1606,40 @@ async function renderMediaShowcase(forceFetch = false) {
     });
 }
 
-// Instantly deletes media edits from cache and background database without prompt
+// Promise-based custom confirmation dialog
+function showCustomConfirm(message, confirmText = "Delete") {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const msgEl = document.getElementById('confirm-message');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+        const okBtn = document.getElementById('confirm-ok-btn');
+        
+        msgEl.textContent = message;
+        okBtn.textContent = confirmText;
+        
+        modal.classList.add('active');
+        
+        function cleanup(result) {
+            modal.classList.remove('active');
+            cancelBtn.removeEventListener('click', onCancel);
+            okBtn.removeEventListener('click', onOk);
+            resolve(result);
+        }
+        
+        function onCancel() { cleanup(false); }
+        function onOk() { cleanup(true); }
+        
+        cancelBtn.addEventListener('click', onCancel);
+        okBtn.addEventListener('click', onOk);
+    });
+}
+
 async function deleteMediaItem(id) {
-    // 1. Instantly remove from local cached memory and re-render grid
     if (loadedMedia) {
         loadedMedia = loadedMedia.filter(item => item.id !== id);
     }
-    renderMediaShowcase(false); // fast re-render!
+    renderMediaShowcase(false);
     
-    // 2. Perform background delete query to database
     try {
         const { error } = await _supabase
             .from('media')
@@ -1619,7 +1650,6 @@ async function deleteMediaItem(id) {
         console.error('Failed to delete from database:', e);
     }
 
-    // 3. Sync local fallback copy in parallel
     let mediaList = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
     mediaList = mediaList.filter(item => item.id !== id);
     localStorage.setItem('polaroid_capsule_media', JSON.stringify(mediaList));
@@ -1627,15 +1657,12 @@ async function deleteMediaItem(id) {
     showToast('Creation deleted.');
 }
 
-// Instantly deletes sealed wishes from cache and background database without prompt
 async function deleteLetterItem(id) {
-    // 1. Instantly remove from local cached memory and re-render grid
     if (loadedLetters) {
         loadedLetters = loadedLetters.filter(item => item.id !== id);
     }
-    renderPolaroidGallery(false); // fast re-render!
+    renderPolaroidGallery(false);
     
-    // 2. Perform background delete query to database
     try {
         const { error } = await _supabase
             .from('letters')
@@ -1646,7 +1673,6 @@ async function deleteLetterItem(id) {
         console.error('Failed to delete letter from database:', e);
     }
 
-    // 3. Sync local fallback copy in parallel
     let lettersList = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
     lettersList = lettersList.filter(item => item.id !== id);
     localStorage.setItem('polaroid_capsule_letters', JSON.stringify(lettersList));
@@ -1654,10 +1680,6 @@ async function deleteLetterItem(id) {
     showToast('Letter deleted successfully.');
     closeModal();
 }
-
-// ==========================================================================
-// BLACKPINK 10th Anniversary specialized helper logic
-// ==========================================================================
 
 // Safe JSON parser for sticker column
 function parseStickerConfig(stickerStr) {
@@ -1730,17 +1752,15 @@ function initAudioPlayer() {
         trackTitle.textContent = playlist[index].title;
     }
 
-    // Autoplay fallback on first click/keypress/touch anywhere on the screen (only if not on Media Hub)
     function autoplayOnInteraction() {
         const isMediaHubActive = viewMediaHub.classList.contains('active');
-        if (isMediaHubActive) return; // Wait until they switch to Capsule
+        if (isMediaHubActive) return;
         
         if (audio.paused) {
             audio.play().then(() => {
                 playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 vinyl.classList.add('playing');
                 if (photoRollTrack) photoRollTrack.classList.add('playing');
-                // Played successfully, remove interaction listeners
                 document.removeEventListener('click', autoplayOnInteraction);
                 document.removeEventListener('keydown', autoplayOnInteraction);
                 document.removeEventListener('touchend', autoplayOnInteraction);
@@ -1800,12 +1820,10 @@ function initAudioPlayer() {
         });
     });
 
-    // Attempt to autoplay immediately on load (will work if browser MEI or settings allow it)
     audio.play().then(() => {
         playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
         vinyl.classList.add('playing');
         if (photoRollTrack) photoRollTrack.classList.add('playing');
-        // Successfully played on load, remove interaction triggers
         document.removeEventListener('click', autoplayOnInteraction);
         document.removeEventListener('keydown', autoplayOnInteraction);
         document.removeEventListener('touchend', autoplayOnInteraction);
@@ -1850,7 +1868,6 @@ function updateLettersProgress(count) {
     if (cdCountText) cdCountText.textContent = `${count.toLocaleString()} / ${target.toLocaleString()}`;
 }
 
-
 // ==========================================================================
 // PWA INSTALL LOGIC & SERVICE WORKER REGISTRATION
 // ==========================================================================
@@ -1867,7 +1884,6 @@ if ('serviceWorker' in navigator) {
             });
     });
 
-    // Reload page when service worker updates and takes control
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
@@ -1879,11 +1895,8 @@ if ('serviceWorker' in navigator) {
 
 // Listen for the beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent standard browser install prompt banner
     e.preventDefault();
-    // Cache the event prompt
     deferredPrompt = e;
-    // Show the Install Button in the header
     if (btnInstallApp) {
         btnInstallApp.classList.remove('hidden');
     }
