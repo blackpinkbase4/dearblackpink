@@ -2190,6 +2190,51 @@ body.dark-mode .input-wrapper input:focus {
 .hidden {
     display: none !important;
 }
+/* Pagination / Load More Buttons */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 32px;
+    margin-bottom: 24px;
+}
+
+.load-more-container .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: var(--transition-smooth);
+    background-color: var(--color-bg-card);
+    border: 1.5px solid var(--color-border);
+    color: var(--color-text-main);
+    box-shadow: var(--shadow-soft-sm);
+    cursor: pointer;
+}
+
+.load-more-container .btn-secondary:hover {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft-md);
+}
+
+body.dark-mode .load-more-container .btn-secondary {
+    background-color: var(--color-bg-card);
+    border-color: #3D2D30;
+    color: #FFF0F2;
+}
+
+body.dark-mode .load-more-container .btn-secondary:hover {
+    background-color: #2D181B;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
 
 /* Quiz Options wrapper */
 .quiz-options-list {
