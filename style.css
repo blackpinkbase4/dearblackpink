@@ -103,9 +103,15 @@ body {
 }
 
 @keyframes blobFloat {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(50px, -30px) scale(1.1); }
-    100% { transform: translate(-30px, 40px) scale(0.95); }
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(50px, -30px) scale(1.1);
+    }
+    100% {
+        transform: translate(-30px, 40px) scale(0.95);
+    }
 }
 
 /* Elegant Header */
@@ -145,6 +151,70 @@ body {
     font-size: 1.4rem;
     font-weight: 700;
     letter-spacing: -0.5px;
+}
+
+/* Debug Mode Switcher */
+.debug-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    box-shadow: var(--shadow-soft-sm);
+    border: 1px solid var(--color-border);
+    transition: var(--transition-smooth);
+    user-select: none;
+}
+
+.debug-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft-md);
+}
+
+.slider-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.toggle-slider {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background-color: var(--color-border);
+    border-radius: 20px;
+    transition: var(--transition-smooth);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: white;
+    top: 3px;
+    left: 3px;
+    transition: var(--transition-smooth);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.debug-toggle input {
+    display: none;
+}
+
+.debug-toggle input:checked + .slider-label {
+    color: var(--color-text-main);
+}
+
+.debug-toggle input:checked ~ .toggle-slider {
+    background-color: var(--color-primary);
+}
+
+.debug-toggle input:checked ~ .toggle-slider::before {
+    transform: translateX(16px);
 }
 
 /* View Container */
@@ -200,11 +270,21 @@ body {
 }
 
 @keyframes heartbeat {
-    0%, 100% { transform: scale(1); }
-    14% { transform: scale(1.15); }
-    28% { transform: scale(1); }
-    42% { transform: scale(1.15); }
-    70% { transform: scale(1); }
+    0%, 100% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.15);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.15);
+    }
+    70% {
+        transform: scale(1);
+    }
 }
 
 .display-title {
@@ -723,6 +803,7 @@ body {
     user-select: none;
 }
 
+/* Small rotation logic to look natural */
 .polaroid:nth-child(3n+1) { transform: rotate(-2deg); }
 .polaroid:nth-child(3n+2) { transform: rotate(1.5deg); }
 .polaroid:nth-child(3n+3) { transform: rotate(-1deg); }
@@ -1332,11 +1413,7 @@ body.dark-mode .toast {
     .app-nav {
         order: 3;
         width: 100%;
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-        border-radius: 12px;
-        padding: 6px;
+        justify-content: center;
     }
     
     .logo-icon {
@@ -1361,8 +1438,7 @@ body.dark-mode .toast {
     }
     
     .nav-link {
-        justify-content: center;
-        padding: 8px 12px;
+        padding: 6px 12px;
         font-size: 0.8rem;
         gap: 6px;
     }
@@ -1801,7 +1877,6 @@ body.dark-mode .countdown-unit {
 }
 
 .target-count {
-    font-family: var(--font-sans);
     font-weight: 700;
     color: var(--color-primary);
 }
@@ -2070,7 +2145,9 @@ body.dark-mode .btn-theme-toggle {
     }
 }
 
-/* Infinite Scrolling Memory Photo Roll (Right Side) */
+/* ==========================================================================
+   5. Infinite Scrolling Memory Photo Roll (Right Side)
+   ========================================================================== */
 .photo-roll-container {
     position: fixed;
     right: 40px;
@@ -2096,8 +2173,12 @@ body.dark-mode .btn-theme-toggle {
 }
 
 @keyframes scrollUp {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-50%); }
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-50%);
+    }
 }
 
 .roll-photo-card {
@@ -2118,6 +2199,7 @@ body.dark-mode .btn-theme-toggle {
     flex-shrink: 0;
 }
 
+/* Fallback placeholder visual elements */
 .roll-photo-card::before {
     content: '🖤💗';
     font-size: 1.6rem;
@@ -2148,8 +2230,473 @@ body.dark-mode .btn-theme-toggle {
     z-index: 2;
 }
 
+/* Hide the photo roll entirely on tablet & mobile screens to avoid overlap */
 @media (max-width: 1100px) {
-    .photo-roll-container { display: none !important; }
+    .photo-roll-container {
+        display: none !important;
+    }
+}
+
+
+/* ==========================================================================
+   BLINK ARCADE STYLES
+   ========================================================================== */
+.binder-container {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.binder-title {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-text-main);
+}
+
+.binder-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+@media(max-width: 900px) {
+    .binder-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media(max-width: 600px) {
+    .binder-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Photocard Card Styling */
+.arcade-card-wrapper {
+    perspective: 1000px;
+    width: 100%;
+}
+
+.arcade-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2.5 / 3.5;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft-sm);
+    transform-style: preserve-3d;
+}
+
+.arcade-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+body.dark-mode .arcade-card:hover {
+    box-shadow: 0 10px 25px rgba(255, 105, 180, 0.1);
+}
+
+/* Locked Card Styling */
+.arcade-card.locked {
+    background-color: var(--color-bg-main);
+    border: 2px dashed var(--color-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+}
+
+.arcade-card.locked .lock-icon {
+    font-size: 2rem;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+    animation: lock-pulse 2s infinite ease-in-out;
+}
+
+@keyframes lock-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.15); opacity: 1; }
+}
+
+.arcade-card.locked .era-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.arcade-card.locked .quiz-trigger-btn {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.arcade-card.locked .quiz-trigger-btn:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Unlocked Holographic Cards */
+.arcade-card.unlocked {
+    background-color: #2c3e50;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #FFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px;
+}
+
+/* Holographic sheen overlay */
+.arcade-card.unlocked::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(105deg, 
+        transparent 30%, 
+        rgba(255, 255, 255, 0.35) 40%, 
+        rgba(255, 255, 255, 0.55) 45%, 
+        rgba(255, 255, 255, 0.35) 50%, 
+        transparent 60%
+    );
+    background-size: 200% 200%;
+    background-position: 150% 0%;
+    transition: background-position 0s;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.arcade-card.unlocked:hover::before {
+    background-position: -50% 100%;
+    transition: background-position 1.2s ease-out;
+}
+
+/* Glitter background overlay */
+.arcade-card.unlocked::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 1;
+    background-image: 
+        radial-gradient(circle, #fff 10%, transparent 11%),
+        radial-gradient(circle, #fff 5%, transparent 6%),
+        radial-gradient(circle, #fff 2%, transparent 3%);
+    background-size: 20px 20px, 40px 40px, 15px 15px;
+    background-position: 0 0, 10px 10px, 5px 5px;
+    animation: sparkle-bg 10s linear infinite;
+}
+
+@keyframes sparkle-bg {
+    0% { background-position: 0 0, 10px 10px, 5px 5px; }
+    100% { background-position: 100px 100px, 20px 120px, 80px 50px; }
+}
+
+/* Gradient themes for era card contents */
+.arcade-card.era-debut { background: linear-gradient(135deg, #FF6B8B 0%, #FF8E53 100%); }
+.arcade-card.era-breakthrough { background: linear-gradient(135deg, #7F00FF 0%, #E100FF 100%); }
+.arcade-card.era-sensation { background: linear-gradient(135deg, #FF007F 0%, #7F00FF 100%); }
+.arcade-card.era-album { background: linear-gradient(135deg, #1A2E40 0%, #00C9FF 100%); }
+.arcade-card.era-bornpink { background: linear-gradient(135deg, #111111 0%, #FF1493 100%); }
+
+.arcade-card .card-decorations {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 1.1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 3;
+}
+
+.arcade-card .card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    padding: 3px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    z-index: 3;
+}
+
+.arcade-card .card-info {
+    position: relative;
+    z-index: 3;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.arcade-card .card-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: white;
+}
+
+.arcade-card .card-subtitle {
+    font-size: 0.7rem;
+    font-weight: 500;
+    opacity: 0.85;
+    color: #FFE6EB;
+}
+
+/* Quiz selection card layout */
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+@media(max-width: 768px) {
+    .quiz-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.quiz-era-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-card);
+    transition: var(--transition-smooth);
+}
+
+.quiz-era-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-3px);
+}
+
+.quiz-era-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.quiz-era-info {
+    flex-grow: 1;
+}
+
+.quiz-era-name {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: 4px;
+}
+
+.quiz-era-desc {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.quiz-era-action {
+    flex-shrink: 0;
+}
+
+.quiz-play-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+}
+
+.quiz-play-btn.completed {
+    background-color: #2E7D32;
+    border-color: #2E7D32;
+    color: white;
+}
+
+/* Quiz Modal Content Elements */
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 16px;
+}
+
+.quiz-progress-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+}
+
+.quiz-timer-bar {
+    width: 100%;
+    height: 4px;
+    background-color: var(--color-border);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.quiz-question-container {
+    margin-bottom: 24px;
+}
+
+.quiz-question-title {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    line-height: 1.4;
+    margin-bottom: 20px;
+}
+
+.quiz-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quiz-option-btn {
+    width: 100%;
+    padding: 14px 20px;
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quiz-option-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    transform: translateX(6px);
+}
+
+.quiz-option-btn.correct-choice {
+    background-color: #E8F5E9;
+    border-color: #2E7D32;
+    color: #1B5E20;
+}
+
+body.dark-mode .quiz-option-btn.correct-choice {
+    background-color: #1B5E20;
+    border-color: #2E7D32;
+    color: #E8F5E9;
+}
+
+.quiz-option-btn.wrong-choice {
+    background-color: #FFEBEE;
+    border-color: #C62828;
+    color: #C62828;
+}
+
+body.dark-mode .quiz-option-btn.wrong-choice {
+    background-color: #C62828;
+    border-color: #FFEBEE;
+    color: #FFEBEE;
+}
+
+/* Quiz completion success view */
+.quiz-success-view {
+    text-align: center;
+    padding: 20px;
+}
+
+.quiz-success-icon {
+    font-size: 4rem;
+    color: #4CAF50;
+    margin-bottom: 20px;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-12px); }
+}
+
+/* Mobile grid for navigation */
+@media(max-width: 600px) {
+    .app-nav {
+        order: 3;
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        border-radius: 12px;
+        padding: 6px;
+    }
+    
+    .nav-link {
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* PWA Install App Button */
+.btn-install-app {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-soft-sm);
+}
+
+.btn-install-app:hover {
+    background-color: var(--color-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-install-app.hidden {
+    display: none !important;
 }
 
 /* Custom Confirmation Modal Styles */
@@ -2159,7 +2706,7 @@ body.dark-mode .btn-theme-toggle {
     border-top: 4px solid var(--color-primary);
 }
 
-/* Autofill overrides to prevent white-on-white text in Dark Mode */
+/* Autofill style overrides for Dark Mode to prevent white-on-white text */
 body.dark-mode input:-webkit-autofill,
 body.dark-mode input:-webkit-autofill:hover, 
 body.dark-mode input:-webkit-autofill:focus, 
@@ -2182,14 +2729,11 @@ body.dark-mode .input-wrapper input:focus {
     border-color: var(--color-primary);
 }
 
-/* ==========================================================================
-   BLINK Quiz Options and Utility Helper Styles (Fixes Live Site Bugs)
-   ========================================================================== */
-
-/* Critical utility helper to hide sections and modals */
+/* Global Hidden Utility Class */
 .hidden {
     display: none !important;
 }
+
 /* Pagination / Load More Buttons */
 .load-more-container {
     display: flex;
@@ -2234,65 +2778,4 @@ body.dark-mode .load-more-container .btn-secondary:hover {
     background-color: #2D181B;
     border-color: var(--color-primary);
     color: var(--color-primary);
-}
-
-/* Quiz Options wrapper */
-.quiz-options-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* Base styles for dynamically populated Quiz buttons */
-.quiz-option-btn {
-    width: 100%;
-    padding: 14px 20px;
-    background-color: var(--color-bg-main);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    text-align: left;
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--color-text-main);
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.quiz-option-btn:hover {
-    border-color: var(--color-primary);
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
-    transform: translateX(6px);
-}
-
-/* PWA App Installation Header Button styles */
-.btn-install-app {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
-    border: 1px solid var(--color-border);
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-family: var(--font-sans);
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    box-shadow: var(--shadow-soft-sm);
-}
-
-.btn-install-app:hover {
-    background-color: var(--color-primary);
-    color: white;
-    transform: scale(1.05);
-}
-
-.btn-install-app.hidden {
-    display: none !important;
 }
