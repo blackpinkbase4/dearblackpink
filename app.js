@@ -891,7 +891,6 @@ function showQuizResult() {
 }
 
 // Opens the Share on X Viral Modal
-// Opens the Share on X Viral Modal
 function openShareXModal(type = 'letter') {
     if (!shareXModal) return;
     shareXModal.classList.add('active');
@@ -914,7 +913,14 @@ function openShareXModal(type = 'letter') {
         const websiteUrl = "https://dearblackpink.vercel.app";
         const twitterIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
         
-        window.open(twitterIntentUrl, '_blank');
+        // Detect mobile user agent
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+            // Navigate in the same tab to preserve deep linking parameters in the native X app
+            window.location.href = twitterIntentUrl;
+        } else {
+            window.open(twitterIntentUrl, '_blank');
+        }
         shareXModal.classList.remove('active');
     });
 }
