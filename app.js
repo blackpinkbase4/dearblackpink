@@ -891,6 +891,7 @@ function showQuizResult() {
 }
 
 // Opens the Share on X Viral Modal
+// Opens the Share on X Viral Modal
 function openShareXModal(type = 'letter') {
     if (!shareXModal) return;
     shareXModal.classList.add('active');
@@ -911,7 +912,7 @@ function openShareXModal(type = 'letter') {
         }
         
         const websiteUrl = "https://dearblackpink.vercel.app";
-        const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
+        const twitterIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
         
         window.open(twitterIntentUrl, '_blank');
         shareXModal.classList.remove('active');
