@@ -891,6 +891,7 @@ function showQuizResult() {
 }
 
 // Opens the Share on X Viral Modal
+// Opens the Share on X Viral Modal
 function openShareXModal(type = 'letter') {
     if (!shareXModal) return;
     shareXModal.classList.add('active');
@@ -911,20 +912,52 @@ function openShareXModal(type = 'letter') {
         }
         
         const websiteUrl = "https://dearblackpink.vercel.app";
+        const fullShareText = `${text} ${websiteUrl}`;
+        
+        // Detect if loaded inside X (Twitter) in-app browser
+        const isTwitterApp = /Twitter|TwitterAndroid|Twitter for iPhone/i.test(navigator.userAgent);
+        
+        if (isTwitterApp) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fullShareText)
+                    .then(() => {
+                        showToast("X App detected! Link copied. Close browser and paste in a new post! 🖤💗");
+                    })
+                    .catch(err => {
+                        console.warn("Clipboard copy failed:", err);
+                    });
+            }
+            shareXModal.classList.remove('active');
+            return; // STOP HERE to prevent browser redirect crash inside X app
+        }
+        
+        // Copy to clipboard as a fallback so they can paste it if deep linking fails
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullShareText)
+                .then(() => {
+                    showToast("Text copied to clipboard! Redirecting to X...");
+                })
+                .catch(err => {
+                    console.warn("Clipboard copy failed:", err);
+                });
+        }
+        
         const twitterIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
         
         // Detect mobile user agent
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-            // Navigate in the same tab to preserve deep linking parameters in the native X app
-            window.location.href = twitterIntentUrl;
-        } else {
-            window.open(twitterIntentUrl, '_blank');
-        }
-        shareXModal.classList.remove('active');
+        
+        // Wait 800ms for user to read the toast, then redirect/open window
+        setTimeout(() => {
+            if (isMobile) {
+                window.location.href = twitterIntentUrl;
+            } else {
+                window.open(twitterIntentUrl, '_blank');
+            }
+            shareXModal.classList.remove('active');
+        }, 800);
     });
 }
-
 // Save letter helper
 async function saveLetter(letter) {
     // Add to active local cache memory immediately for instant update
