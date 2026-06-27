@@ -8,12 +8,20 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TARGET_DATE = new Date("2026-08-07T15:00:00Z");
 
 // App State
+// App State
 let currentUser = {
     sender: '',
     recipient: ''
 };
 let loadedLetters = null;
 let loadedMedia = null;
+
+// Pagination configuration
+const lettersPerPage = 12;
+let visibleLettersCount = 12;
+
+const mediaPerPage = 8;
+let visibleMediaCount = 8;
 
 // Initial Seed Letters (pre-populated to make the vault feel alive)
 const SEED_LETTERS = [];
@@ -430,8 +438,9 @@ function setupEventListeners() {
         }
     });
 
-    // Search input typing
+       // Search input typing
     gallerySearch.addEventListener('input', () => {
+        visibleLettersCount = lettersPerPage;
         renderPolaroidGallery();
     });
 
@@ -440,6 +449,7 @@ function setupEventListeners() {
         btn.addEventListener('click', (e) => {
             filterButtons.forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
+            visibleLettersCount = lettersPerPage;
             renderPolaroidGallery();
         });
     });
@@ -593,20 +603,36 @@ function setupEventListeners() {
         }
 
         // Disable button during upload
+            // Disable button during upload
         const submitBtn = mediaUploadForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = 'Uploading to Cloud... <i class="fa-solid fa-spinner fa-spin"></i>';
 
         try {
+            let fileToUpload = selectedFileObject;
+            
+            // Compress if it is an image
+            if (uploadedFileType === 'image') {
+                submitBtn.innerHTML = 'Optimizing Image... <i class="fa-solid fa-wand-magic-sparkles"></i>';
+                try {
+                    fileToUpload = await compressImage(selectedFileObject);
+                    console.log(`Original image size: ${(selectedFileObject.size / 1024).toFixed(1)}KB, Compressed: ${(fileToUpload.size / 1024).toFixed(1)}KB`);
+                } catch (compressErr) {
+                    console.error('Image compression failed, using original:', compressErr);
+                }
+            }
+
+            submitBtn.innerHTML = 'Uploading to Cloud... <i class="fa-solid fa-spinner fa-spin"></i>';
+
             // 1. Upload to Supabase Storage Bucket
-            const fileExt = selectedFileObject.name.split('.').pop();
+            const fileExt = fileToUpload.name.split('.').pop();
             const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
             const filePath = `uploads/${fileName}`;
 
             const { data, error: uploadError } = await _supabase.storage
                 .from('fan-uploads')
-                .upload(filePath, selectedFileObject);
+                .upload(filePath, fileToUpload);
 
             if (uploadError) throw uploadError;
 
@@ -1125,11 +1151,22 @@ async function renderPolaroidGallery(forceFetch = false) {
     });
 
     // Update statistics badge count
+       // Update statistics badge count
     totalLettersCount.innerHTML = `<i class="fa-solid fa-images"></i> ${filtered.length} Polaroid${filtered.length === 1 ? '' : 's'} Sealed`;
 
-    if (filtered.length === 0) {
+    const btnLoadMoreLetters = document.getElementById('btn-load-more-letters');
+    if (filtered.length > visibleLettersCount) {
+        if (btnLoadMoreLetters) btnLoadMoreLetters.classList.remove('hidden');
+    } else {
+        if (btnLoadMoreLetters) btnLoadMoreLetters.classList.add('hidden');
+    }
+
+    let displayed = filtered.slice(0, visibleLettersCount);
+
+    if (displayed.length === 0) {
         galleryEmpty.classList.remove('hidden');
         polaroidGrid.style.display = 'none';
+        if (btnLoadMoreLetters) btnLoadMoreLetters.classList.add('hidden');
         return;
     }
 
@@ -1138,7 +1175,7 @@ async function renderPolaroidGallery(forceFetch = false) {
     polaroidGrid.innerHTML = '';
 
     // Populate Polaroids
-    filtered.forEach(letter => {
+    displayed.forEach(letter => {
         const config = parseStickerConfig(letter.sticker);
         
         const polaroidCard = document.createElement('div');
@@ -1221,10 +1258,69 @@ function getRotationForId(id) {
 }
 
 // Helper to escape HTML characters
+// Helper to escape HTML characters
 function escapeHTML(str) {
     const p = document.createElement('p');
     p.textContent = str;
     return p.innerHTML;
+}
+
+// Client-side image compressor before upload
+function compressImage(file, maxWidth = 1600, maxHeight = 1600, quality = 0.8) {
+    return new Promise((resolve) => {
+        if (typeof window === 'undefined' || !window.FileReader || !window.HTMLCanvasElement) {
+            return resolve(file);
+        }
+        
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                try {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth || height > maxHeight) {
+                        if (width > height) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        } else {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        return resolve(file);
+                    }
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        } else {
+                            resolve(file);
+                        }
+                    }, 'image/jpeg', quality);
+                } catch (e) {
+                    console.error('Image compression error, uploading original:', e);
+                    resolve(file);
+                }
+            };
+            img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+    });
 }
 
 // Get correct icon class for stamps
@@ -1428,11 +1524,21 @@ async function renderMediaShowcase(forceFetch = false) {
     customMedia = loadedMedia;
     const allMedia = [...customMedia, ...SEED_MEDIA];
 
-    totalMediaCount.innerHTML = `<i class="fa-solid fa-photo-film"></i> ${allMedia.length} Creation${allMedia.length === 1 ? '' : 's'} Shared`;
+      totalMediaCount.innerHTML = `<i class="fa-solid fa-photo-film"></i> ${allMedia.length} Creation${allMedia.length === 1 ? '' : 's'} Shared`;
 
-    if (allMedia.length === 0) {
+    const btnLoadMoreMedia = document.getElementById('btn-load-more-media');
+    if (allMedia.length > visibleMediaCount) {
+        if (btnLoadMoreMedia) btnLoadMoreMedia.classList.remove('hidden');
+    } else {
+        if (btnLoadMoreMedia) btnLoadMoreMedia.classList.add('hidden');
+    }
+
+    let displayed = allMedia.slice(0, visibleMediaCount);
+
+    if (displayed.length === 0) {
         mediaEmpty.classList.remove('hidden');
         mediaGrid.style.display = 'none';
+        if (btnLoadMoreMedia) btnLoadMoreMedia.classList.add('hidden');
         return;
     }
 
@@ -1440,7 +1546,7 @@ async function renderMediaShowcase(forceFetch = false) {
     mediaGrid.style.display = 'grid';
     mediaGrid.innerHTML = '';
 
-    allMedia.forEach(item => {
+    displayed.forEach(item => {
         const card = document.createElement('div');
         card.className = 'media-card';
 
