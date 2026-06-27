@@ -269,6 +269,7 @@
 
                 <div class="countdown-info">
                     <p class="target-date-label"><i class="fa-regular fa-calendar-check"></i> Unlocking Date: <strong>August 8, 2026, at 12:00 AM KST (Korean Standard Time)</strong></p>
+                    <p class="explanation">On this date, the vault will open, and every letter written by fans all over the world will be displayed as vintage Polaroid snapshots for everyone to read.</p>
                 </div>
 
                 <div class="countdown-actions">
@@ -308,7 +309,7 @@
                 </div>
             </div>
 
-                       <!-- The Masonry Grid of Polaroids -->
+            <!-- The Masonry Grid of Polaroids -->
             <div class="polaroid-grid" id="polaroid-grid">
                 <!-- Dynamically populated Polaroids -->
             </div>
@@ -344,7 +345,7 @@
             </div>
 
             <!-- Upload section -->
-            <div class="card pad-card" style="margin-bottom: 40px; padding: 32px;">
+            <div class="card pad-card" style="margin-bottom: 40px;">
                 <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 20px; font-weight: 700;"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--color-primary); margin-right: 8px;"></i> Share a New Creation</h3>
                 
                 <form id="media-upload-form">
@@ -388,7 +389,7 @@
                 </form>
             </div>
 
-                       <!-- Media Grid -->
+            <!-- Media Grid -->
             <div class="media-grid" id="media-grid">
                 <!-- Dynamically populated fan edits -->
             </div>
@@ -406,6 +407,7 @@
                 <p>Be the first to share an edit or graphic!</p>
             </div>
         </section>
+
 
         <!-- VIEW 7: BLINK QUIZ (PERSONALITY MATCH) -->
         <section id="view-quiz" class="app-view">
@@ -521,6 +523,20 @@
         </div>
     </div>
 
+    <!-- Custom Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content confirm-modal-content card">
+            <div class="confirm-icon" style="font-size: 2.5rem; color: var(--color-primary); margin-bottom: 16px;">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h3 id="confirm-message" style="font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 24px; font-weight: 700; color: var(--color-text-main);">Are you sure?</h3>
+            <div style="display: flex; gap: 12px; max-width: 280px; margin: 0 auto; width: 100%;">
+                <button id="confirm-cancel-btn" class="btn btn-secondary" style="padding: 12px 20px; font-size: 0.9rem;">Cancel</button>
+                <button id="confirm-ok-btn" class="btn btn-primary" style="padding: 12px 20px; font-size: 0.9rem; background-color: #D32F2F;">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Share on X (Twitter) Popup Modal -->
     <div class="modal-overlay" id="share-x-modal">
         <div class="modal-content card" style="max-width: 400px; padding: 32px 24px; text-align: center; border-top: 4px solid var(--color-primary); position: relative;">
@@ -591,6 +607,7 @@
         </div>
         <div class="player-details">
             <div class="track-title" id="player-track-title">Silent Reflections</div>
+            <div class="track-subtitle">lo-fi instrumental piano</div>
             <div class="player-controls">
                 <button id="btn-player-prev" class="btn-ctrl" title="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
                 <button id="btn-player-play" class="btn-ctrl play-pause-btn" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
