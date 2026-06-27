@@ -911,7 +911,7 @@ function openShareXModal(type = 'letter') {
         }
         
         const websiteUrl = "https://dearblackpink.vercel.app";
-        const twitterIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
+        const twitterIntentUrl = `https://twitter.com/share?text=${encodeURIComponent(text)}&url=${encodeURIComponent(websiteUrl)}`;
         
         // Detect mobile user agent
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
