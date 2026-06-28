@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dear-bp-v15';
+const CACHE_NAME = 'dear-bp-v21';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -37,15 +37,10 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// Fetch Event - network first fallback to cache for critical assets
+// Fetch Event - network first fallback to cache for critical assets, stale-while-revalidate for heavy assets.
 self.addEventListener('fetch', (event) => {
-  // 1. Exclude Supabase database requests to guarantee real-time sync
+  // Exclude Supabase API and DB calls from caching to ensure live real-time sync
   if (event.request.url.includes('supabase.co')) {
-    return;
-  }
-
-  // 2. Exclude Range requests and MP3 files to prevent playback failures in Chrome/Safari
-  if (event.request.headers.has('range') || event.request.url.endsWith('.mp3')) {
     return;
   }
 
@@ -76,7 +71,7 @@ self.addEventListener('fetch', (event) => {
         })
     );
   } else {
-    // Stale-While-Revalidate Strategy for other static assets (icons, images)
+    // Stale-While-Revalidate Strategy for other static assets (music, icons)
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
