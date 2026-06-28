@@ -47,6 +47,9 @@
             <button id="nav-quiz" class="nav-link">
                 <i class="fa-solid fa-gamepad"></i> BLINK Quiz
             </button>
+            <button id="nav-pass" class="nav-link">
+                <i class="fa-solid fa-id-card"></i> BLINK VIP Pass 🎫
+            </button>
         </nav>
 
         <div class="header-controls">
@@ -465,6 +468,230 @@
             </div>
         </section>
 
+        <!-- VIEW 4: VIP BACKSTAGE PASS GENERATOR -->
+        <section id="view-pass-generator" class="app-view">
+            <div class="gallery-intro" style="margin-bottom: 20px;">
+                <h1 class="gallery-title">BLINK VIP Pass 🎫</h1>
+                <p class="gallery-subtitle">Design your own premium concert VIP lanyard. Choose your bias to dynamically shift the styling, upload a photo, and share it with the world!</p>
+            </div>
+
+            <div class="pass-creator-layout">
+                <!-- Left panel: Control Form -->
+                <div class="pass-controls card">
+                    <div class="form-group">
+                        <label class="form-label" for="pass-input-name">CARDHOLDER NAME</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" id="pass-input-name" placeholder="Enter your name" maxlength="20">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CHOOSE PASS FINISH</label>
+                        <div class="finish-selector-pass" style="display: flex; gap: 10px; margin-top: 8px;">
+                            <button type="button" class="btn-finish-pass active" data-finish="glossy" style="flex: 1; padding: 10px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--color-border); background-color: transparent; color: var(--color-text-main); border-radius: 6px; cursor: pointer;" title="Classic Glossy">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Glossy
+                            </button>
+                            <button type="button" class="btn-finish-pass" data-finish="foil" style="flex: 1; padding: 10px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--color-border); background-color: transparent; color: var(--color-text-main); border-radius: 6px; cursor: pointer;" title="Gold/Pink Foil">
+                                <i class="fa-solid fa-crown"></i> Foil Gold
+                            </button>
+                            <button type="button" class="btn-finish-pass" data-finish="glitter" style="flex: 1; padding: 10px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--color-border); background-color: transparent; color: var(--color-text-main); border-radius: 6px; cursor: pointer;" title="Glitter Sparkle">
+                                <i class="fa-solid fa-star"></i> Glitter
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CHOOSE YOUR BIAS</label>
+                        <div class="bias-selector-pass">
+                            <button type="button" class="btn-bias-pass active" data-bias="ot4">
+                                <span class="bias-dot ot4"></span> OT4
+                            </button>
+                            <button type="button" class="btn-bias-pass" data-bias="jisoo">
+                                <span class="bias-dot jisoo"></span> JISOO
+                            </button>
+                            <button type="button" class="btn-bias-pass" data-bias="jennie">
+                                <span class="bias-dot jennie"></span> JENNIE
+                            </button>
+                            <button type="button" class="btn-bias-pass" data-bias="rose">
+                                <span class="bias-dot rose"></span> ROSÉ
+                            </button>
+                            <button type="button" class="btn-bias-pass" data-bias="lisa">
+                                <span class="bias-dot lisa"></span> LISA
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="pass-input-song">FAVORITE ANTHEM</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fa-solid fa-music"></i></span>
+                            <select id="pass-input-song">
+                                <option value="BOOMBAYAH">BOOMBAYAH</option>
+                                <option value="WHISTLE">WHISTLE</option>
+                                <option value="PLAYING WITH FIRE">PLAYING WITH FIRE</option>
+                                <option value="STAY">STAY</option>
+                                <option value="AS IF IT'S YOUR LAST">AS IF IT'S YOUR LAST</option>
+                                <option value="DDU-DU DDU-DU">DDU-DU DDU-DU</option>
+                                <option value="Forever Young">Forever Young</option>
+                                <option value="Really">Really</option>
+                                <option value="See U Later">See U Later</option>
+                                <option value="Kiss and Make Up (with Dua Lipa)">Kiss and Make Up (with Dua Lipa)</option>
+                                <option value="Kill This Love">Kill This Love</option>
+                                <option value="Don't Know What To Do">Don't Know What To Do</option>
+                                <option value="Kick It">Kick It</option>
+                                <option value="Hope Not">Hope Not</option>
+                                <option value="How You Like That">How You Like That</option>
+                                <option value="Ice Cream (with Selena Gomez)">Ice Cream (with Selena Gomez)</option>
+                                <option value="Pretty Savage">Pretty Savage</option>
+                                <option value="Bet You Wanna (feat. Cardi B)">Bet You Wanna (feat. Cardi B)</option>
+                                <option value="Lovesick Girls">Lovesick Girls</option>
+                                <option value="Crazy Over You">Crazy Over You</option>
+                                <option value="Love To Hate Me">Love To Hate Me</option>
+                                <option value="You Never Know">You Never Know</option>
+                                <option value="Sour Candy (with Lady Gaga)">Sour Candy (with Lady Gaga)</option>
+                                <option value="Pink Venom">Pink Venom</option>
+                                <option value="Shut Down">Shut Down</option>
+                                <option value="Typa Girl">Typa Girl</option>
+                                <option value="Yeah Yeah Yeah">Yeah Yeah Yeah</option>
+                                <option value="Hard to Love">Hard to Love</option>
+                                <option value="The Happiest Girl">The Happiest Girl</option>
+                                <option value="Tally">Tally</option>
+                                <option value="Ready For Love">Ready For Love</option>
+                                <option value="THE GIRLS">THE GIRLS</option>
+                                <option value="JUMP">JUMP</option>
+                                <option value="GO">GO</option>
+                                <option value="Me and my">Me and my</option>
+                                <option value="Champion">Champion</option>
+                                <option value="Fxxxboy">Fxxxboy</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CHOOSE PROFILE PHOTO</label>
+                        <div class="photo-source-selection">
+                            <!-- Custom upload button triggering hidden input -->
+                            <button type="button" id="btn-pass-upload-trigger" class="btn btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; padding: 12px;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Custom Photo
+                            </button>
+                            <input type="file" id="pass-photo-upload" accept="image/*" style="display: none;">
+                            
+                            <p class="photo-divider">or select a member portrait:</p>
+                            
+                            <div class="concept-thumbnails">
+                                <button type="button" class="btn-thumbnail-pick active" data-img-src="bp_pic1.jpg">
+                                    <img src="bp_pic1.jpg" alt="OT4">
+                                </button>
+                                <button type="button" class="btn-thumbnail-pick" data-img-src="quiz_jisoo.jpg">
+                                    <img src="quiz_jisoo.jpg" alt="Jisoo">
+                                </button>
+                                <button type="button" class="btn-thumbnail-pick" data-img-src="quiz_jennie.jpg">
+                                    <img src="quiz_jennie.jpg" alt="Jennie">
+                                </button>
+                                <button type="button" class="btn-thumbnail-pick" data-img-src="quiz_rose.jpg">
+                                    <img src="quiz_rose.jpg" alt="Rosé">
+                                </button>
+                                <button type="button" class="btn-thumbnail-pick" data-img-src="quiz_lisa.jpg">
+                                    <img src="quiz_lisa.jpg" alt="Lisa">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="pass-input-badge">ACHIEVEMENT STAMP</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fa-solid fa-award"></i></span>
+                            <select id="pass-input-badge">
+                                <option value="Square One Era">Square One Era ⬛</option>
+                                <option value="Square Two Era">Square Two Era 🟥</option>
+                                <option value="As If It's Your Last Era">As If It's Your Last Era 💖</option>
+                                <option value="Square Up Era">Square Up Era 🟦</option>
+                                <option value="Kill This Love Era">Kill This Love Era 💔</option>
+                                <option value="The Album Era">The Album Era 👑</option>
+                                <option value="Born Pink Era">Born Pink Era 🌸</option>
+                                <option value="DEADLINE Era">DEADLINE Era ⏳</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: Interactive Live Preview -->
+                <div class="pass-preview-container">
+                    <div class="lanyard-strap">
+                        <div class="lanyard-hole"></div>
+                        <div class="lanyard-clip"></div>
+                    </div>
+
+                    <!-- The VIP Pass Card itself -->
+                    <div class="vip-backstage-pass theme-ot4" id="vip-pass-card">
+                        <!-- Holographic reflection overlay -->
+                        <div class="hologram-sheen"></div>
+                        
+                        <div class="pass-header">
+                            <div class="pass-title-group">
+                                <span class="pass-mini-tag">10TH ANNIVERSARY</span>
+                                <h2 class="pass-logo-text">Dear BLACKPINK</h2>
+                            </div>
+                            <span class="pass-category-badge">VIP ACCESS</span>
+                        </div>
+
+                        <div class="pass-photo-frame">
+                            <img id="pass-preview-photo" src="bp_pic1.jpg" alt="Profile Photo">
+                            <div class="pass-hologram-seal">
+                                <i class="fa-solid fa-compact-disc"></i>
+                            </div>
+                        </div>
+
+                        <div class="pass-body-details">
+                            <div class="pass-row">
+                                <div class="pass-field">
+                                    <div class="field-label">VIP NAME</div>
+                                    <div class="field-value" id="pass-val-name">YOUR NAME HERE</div>
+                                </div>
+                                <div class="pass-field" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                                    <div class="field-label">STAMP</div>
+                                    <div class="pass-val-stamp-badge" id="pass-val-stamp">Born Pink Era 🌸</div>
+                                </div>
+                            </div>
+
+                            <div class="pass-row">
+                                <div class="pass-field">
+                                    <div class="field-label">FAVORITE SONG</div>
+                                    <div class="field-value" id="pass-val-song">STAY</div>
+                                </div>
+                                <div class="pass-field" style="text-align: right;">
+                                    <div class="field-label">BIAS GROUP</div>
+                                    <div class="field-value text-accent-color" id="pass-val-bias">OT4 / BORN PINK</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pass-footer" style="padding-top: 10px;">
+                            <div class="pass-qr-section" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 16px;">
+                                <img src="spotify_qr.png" alt="Spotify QR Code" style="width: 66px; height: 66px; border: 1.5px solid var(--color-border); padding: 4px; background-color: #FFFFFF;" id="preview-spotify-qr-img">
+                                <div class="qr-label-group" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                                    <span class="pass-serial-no" style="font-size: 0.65rem; font-weight: 800; color: var(--color-primary); letter-spacing: 1px;">SPOTIFY SCAN PASS</span>
+                                    <span class="pass-serial-no" style="font-family: monospace; font-size: 0.55rem; font-weight: 600; letter-spacing: 1px; color: var(--color-text-muted);">BP-20260807-VIP</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons below preview -->
+                    <div class="pass-action-buttons">
+                        <button id="btn-pass-download" class="btn btn-primary" style="flex: 1; padding: 14px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="fa-solid fa-download"></i> Download VIP Pass
+                        </button>
+                        <button id="btn-pass-share-x" class="btn btn-secondary" style="padding: 14px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; background-color: #000000; border-color: #000000; color: #ffffff;">
+                            <i class="fa-brands fa-x-twitter"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Polaroid Zoom Modal Detail -->
@@ -554,6 +781,31 @@
         </div>
     </div>
 
+    <!-- Pass Share Modal -->
+    <div class="modal-overlay" id="pass-share-modal">
+        <div class="modal-content card" style="max-width: 400px; text-align: center; padding: 32px 24px; position: relative;">
+            <button class="modal-close" id="pass-share-close-btn"><i class="fa-solid fa-xmark"></i></button>
+            <div style="font-size: 3rem; color: var(--color-primary); margin-bottom: 16px;">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--color-text-main); margin-bottom: 8px;">VIP Pass Saved! 🎉</h3>
+            <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 24px; line-height: 1.5;">Your personalized VIP Concert Pass has been downloaded successfully. Share it on your favorite social platforms!</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <a id="btn-share-modal-x" href="#" target="_blank" class="btn btn-secondary" style="background-color: #000000; border-color: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; text-decoration: none;">
+                    <i class="fa-brands fa-x-twitter"></i> Share on X (Twitter)
+                </a>
+                <a id="btn-share-modal-wa" href="#" target="_blank" class="btn btn-secondary" style="background-color: #25D366; border-color: #25D366; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; text-decoration: none;">
+                    <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+                </a>
+                <button id="btn-share-modal-copy" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
+                    <i class="fa-solid fa-link"></i> Copy Link
+                </button>
+                <button id="btn-share-modal-cancel" class="btn btn-secondary" style="padding: 12px; font-size: 0.9rem; margin-top: 4px;">Cancel / Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div class="toast" id="toast-notification">
         <span id="toast-message">Notification message here</span>
@@ -607,6 +859,7 @@
         </div>
         <div class="player-details">
             <div class="track-title" id="player-track-title">Silent Reflections</div>
+            <div class="track-subtitle">lo-fi instrumental piano</div>
             <div class="player-controls">
                 <button id="btn-player-prev" class="btn-ctrl" title="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
                 <button id="btn-player-play" class="btn-ctrl play-pause-btn" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
