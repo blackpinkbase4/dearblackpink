@@ -2779,3 +2779,542 @@ body.dark-mode .load-more-container .btn-secondary:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
+/* ==========================================================================
+   LANYARD AND VIP PASS PREVIEW LAYOUTS
+   ========================================================================== */
+.pass-creator-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 32px;
+    align-items: start;
+    margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+    .pass-creator-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+.pass-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+    padding: 32px;
+}
+
+.pass-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding-top: 50px;
+    width: 100%;
+}
+
+.lanyard-strap {
+    position: absolute;
+    top: 0;
+    width: 24px;
+    height: 60px;
+    background-color: #1E1517; /* Dark strap */
+    border-left: 2px solid #FF7590;
+    border-right: 2px solid #FF7590;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lanyard-hole {
+    width: 28px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: #4A3034;
+    border: 2px solid #FFDADE;
+}
+
+.lanyard-clip {
+    width: 16px;
+    height: 20px;
+    background-color: #D5CBD2;
+    border: 2px solid #4A3034;
+    border-radius: 4px;
+    margin-top: -2px;
+    position: relative;
+}
+
+.lanyard-clip::before {
+    content: '';
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 2px solid #4A3034;
+}
+
+/* Backstage Pass card styling */
+.vip-backstage-pass {
+    width: 320px;
+    height: 480px;
+    border-radius: 0px;
+    border: 4px solid #FF7590;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+    background-color: #121212 !important;
+    color: #FFFFFF;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
+}
+
+.vip-backstage-pass .pass-mini-tag {
+    color: #FF8FA3 !important;
+}
+
+.vip-backstage-pass .pass-logo-text {
+    color: #FFFFFF !important;
+}
+
+.vip-backstage-pass .field-label {
+    color: #A0A0A0 !important;
+}
+
+.vip-backstage-pass .field-value {
+    color: #FFFFFF !important;
+}
+
+.vip-backstage-pass:hover {
+    transform: translateY(-8px);
+}
+
+/* Hologram Refractive Overlay */
+.hologram-sheen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.18) 40%,
+        rgba(255, 255, 255, 0.28) 45%,
+        rgba(255, 180, 200, 0.28) 50%,
+        rgba(180, 240, 255, 0.28) 55%,
+        rgba(255, 255, 255, 0) 65%
+    );
+    background-size: 250% 250%;
+    background-position: 0% 0%;
+    pointer-events: none;
+    z-index: 10;
+    mix-blend-mode: color-dodge;
+    transition: background-position 0.6s ease;
+}
+
+.vip-backstage-pass:hover .hologram-sheen {
+    background-position: 100% 100%;
+}
+
+.pass-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px dashed var(--color-border);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+.pass-mini-tag {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.pass-logo-text {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+.pass-category-badge {
+    background: linear-gradient(135deg, #FF7590, #FF007F);
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 6px rgba(255, 0, 127, 0.25);
+}
+
+.pass-photo-frame {
+    width: 100%;
+    height: 200px;
+    border-radius: 0px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--color-border);
+    background-color: #FFF4F5;
+}
+
+.pass-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pass-hologram-seal {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,182,193,0.8) 50%, rgba(135,206,235,0.8) 100%);
+    border: 1.5px dashed rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.95);
+    font-size: 0.9rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    animation: rotateSeal 15s linear infinite;
+    mix-blend-mode: screen;
+}
+
+@keyframes rotateSeal {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.pass-body-details {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.pass-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pass-field {
+    flex: 1;
+}
+
+.field-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
+
+.field-value {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-accent-color {
+    color: var(--color-primary);
+}
+
+.pass-footer {
+    border-top: 2px dashed var(--color-border);
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.pass-serial-no {
+    font-family: monospace;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--color-text-muted);
+}
+
+.pass-action-buttons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* ==========================================================================
+   DYNAMIC BIAS THEMES (PASS COLORWAYS)
+   ========================================================================== */
+
+/* OT4 Theme */
+.vip-backstage-pass.theme-ot4 {
+    border-color: #FF7590;
+}
+.vip-backstage-pass.theme-ot4 .text-accent-color {
+    color: #FF7590 !important;
+}
+.vip-backstage-pass.theme-ot4 .pass-photo-frame {
+    background-color: #1E1A1B;
+    border-color: #FF7590;
+}
+.vip-backstage-pass.theme-ot4 .pass-header,
+.vip-backstage-pass.theme-ot4 .pass-footer {
+    border-color: rgba(255, 117, 144, 0.3);
+}
+
+/* Jisoo Theme (Purple Accent) */
+.vip-backstage-pass.theme-jisoo {
+    border-color: #8F66FF;
+}
+.vip-backstage-pass.theme-jisoo .pass-photo-frame {
+    background-color: #17151E;
+    border-color: #8F66FF;
+}
+.vip-backstage-pass.theme-jisoo .pass-header,
+.vip-backstage-pass.theme-jisoo .pass-footer {
+    border-color: rgba(143, 102, 255, 0.3);
+}
+.vip-backstage-pass.theme-jisoo .text-accent-color {
+    color: #AC92FF !important;
+}
+.vip-backstage-pass.theme-jisoo .pass-category-badge {
+    background: linear-gradient(135deg, #AC92FF, #5C2FE8);
+    box-shadow: 0 2px 6px rgba(92, 47, 232, 0.25);
+}
+
+/* Jennie Theme (Ruby Red Accent) */
+.vip-backstage-pass.theme-jennie {
+    border-color: #FF1E56;
+}
+.vip-backstage-pass.theme-jennie .pass-photo-frame {
+    background-color: #1E1517;
+    border-color: #FF1E56;
+}
+.vip-backstage-pass.theme-jennie .pass-header,
+.vip-backstage-pass.theme-jennie .pass-footer {
+    border-color: rgba(255, 30, 86, 0.3);
+}
+.vip-backstage-pass.theme-jennie .text-accent-color {
+    color: #FF3E70 !important;
+}
+.vip-backstage-pass.theme-jennie .pass-category-badge {
+    background: linear-gradient(135deg, #FF6692, #9E0031);
+    box-shadow: 0 2px 6px rgba(158, 0, 49, 0.25);
+}
+
+/* Rosé Theme (Pastel Pink Accent) */
+.vip-backstage-pass.theme-rose {
+    border-color: #FFA6C9;
+}
+.vip-backstage-pass.theme-rose .pass-photo-frame {
+    background-color: #1E1618;
+    border-color: #FFA6C9;
+}
+.vip-backstage-pass.theme-rose .pass-header,
+.vip-backstage-pass.theme-rose .pass-footer {
+    border-color: rgba(255, 166, 201, 0.3);
+}
+.vip-backstage-pass.theme-rose .text-accent-color {
+    color: #FFA6C9 !important;
+}
+.vip-backstage-pass.theme-rose .pass-category-badge {
+    background: linear-gradient(135deg, #FFA6C9, #E65A88);
+    box-shadow: 0 2px 6px rgba(230, 90, 136, 0.25);
+}
+
+/* Lisa Theme (Yellow Accent) */
+.vip-backstage-pass.theme-lisa {
+    border-color: #FFD000;
+}
+.vip-backstage-pass.theme-lisa .pass-photo-frame {
+    background-color: #1E1E14;
+    border-color: #FFD000;
+}
+.vip-backstage-pass.theme-lisa .pass-header,
+.vip-backstage-pass.theme-lisa .pass-footer {
+    border-color: rgba(255, 208, 0, 0.3);
+}
+.vip-backstage-pass.theme-lisa .text-accent-color {
+    color: #FFE066 !important;
+}
+.vip-backstage-pass.theme-lisa .pass-category-badge {
+    background: linear-gradient(135deg, #FFE066, #E5B500);
+    box-shadow: 0 2px 6px rgba(229, 181, 0, 0.25);
+}
+
+/* Dark Mode Overrides for VIP Pass */
+body.dark-mode .vip-backstage-pass, .vip-backstage-pass {
+    background-color: #121212 !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+body.dark-mode .lanyard-hole {
+    background-color: #120F10;
+}
+body.dark-mode .btn-bias-pass {
+    background-color: #2D1A1D;
+    border-color: #4A2B30;
+    color: #FFF0F2;
+}
+body.dark-mode .btn-bias-pass.active {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+body.dark-mode .btn-thumbnail-pick {
+    border-color: #4A2B30;
+}
+body.dark-mode .btn-thumbnail-pick.active {
+    border-color: var(--color-primary);
+}
+
+/* Real ink/rubber stamp look for Pass Stamp */
+.pass-val-stamp-badge {
+    display: inline-block;
+    border: 3px double var(--color-primary);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.68rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    transform: rotate(-6deg);
+    letter-spacing: 0.5px;
+    background-color: rgba(255, 255, 255, 0.4);
+    mix-blend-mode: multiply;
+    transition: var(--transition-smooth);
+    border-style: double;
+}
+
+/* Background selector focus and active styles */
+.btn-bg-pass {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.btn-bg-pass:hover {
+    transform: scale(1.15);
+}
+.btn-bg-pass.active {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 8px var(--color-primary);
+    transform: scale(1.15);
+}
+
+.custom-bg-picker-wrapper {
+    transition: transform 0.2s ease;
+}
+.custom-bg-picker-wrapper:hover {
+    transform: scale(1.15);
+}
+.custom-bg-picker-wrapper.active {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 8px var(--color-primary);
+    transform: scale(1.15);
+}
+
+/* Premium Finish Button Selector */
+.btn-finish-pass {
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.btn-finish-pass:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 117, 144, 0.08) !important;
+}
+.btn-finish-pass.active {
+    border-color: var(--color-primary) !important;
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 8px var(--color-primary);
+}
+
+/* Foil Finish Override styling */
+.vip-backstage-pass.finish-foil, 
+.vip-backstage-pass.finish-foil.theme-ot4,
+.vip-backstage-pass.finish-foil.theme-jisoo,
+.vip-backstage-pass.finish-foil.theme-jennie,
+.vip-backstage-pass.finish-foil.theme-rose,
+.vip-backstage-pass.finish-foil.theme-lisa {
+    border-color: #D4AF37 !important; /* Gold border fallback */
+    border-image: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%) 1 !important;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.45) !important;
+}
+
+.vip-backstage-pass.finish-foil .text-accent-color,
+.vip-backstage-pass.finish-foil.theme-ot4 .text-accent-color,
+.vip-backstage-pass.finish-foil.theme-jisoo .text-accent-color,
+.vip-backstage-pass.finish-foil.theme-jennie .text-accent-color,
+.vip-backstage-pass.finish-foil.theme-rose .text-accent-color,
+.vip-backstage-pass.finish-foil.theme-lisa .text-accent-color {
+    background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 30%, #B38728 70%, #AA771C 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block !important;
+}
+
+.vip-backstage-pass.finish-foil .pass-category-badge,
+.vip-backstage-pass.finish-foil.theme-ot4 .pass-category-badge,
+.vip-backstage-pass.finish-foil.theme-jisoo .pass-category-badge,
+.vip-backstage-pass.finish-foil.theme-jennie .pass-category-badge,
+.vip-backstage-pass.finish-foil.theme-rose .pass-category-badge,
+.vip-backstage-pass.finish-foil.theme-lisa .pass-category-badge {
+    background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%) !important;
+    color: #121212 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 4px 12px rgba(179, 135, 40, 0.4) !important;
+    border: none !important;
+}
+
+.vip-backstage-pass.finish-foil .pass-photo-frame,
+.vip-backstage-pass.finish-foil.theme-ot4 .pass-photo-frame,
+.vip-backstage-pass.finish-foil.theme-jisoo .pass-photo-frame,
+.vip-backstage-pass.finish-foil.theme-jennie .pass-photo-frame,
+.vip-backstage-pass.finish-foil.theme-rose .pass-photo-frame,
+.vip-backstage-pass.finish-foil.theme-lisa .pass-photo-frame {
+    border-color: #B38728 !important;
+}
+
+.vip-backstage-pass.finish-foil .pass-val-stamp-badge,
+.vip-backstage-pass.finish-foil.theme-ot4 .pass-val-stamp-badge,
+.vip-backstage-pass.finish-foil.theme-jisoo .pass-val-stamp-badge,
+.vip-backstage-pass.finish-foil.theme-jennie .pass-val-stamp-badge,
+.vip-backstage-pass.finish-foil.theme-rose .pass-val-stamp-badge,
+.vip-backstage-pass.finish-foil.theme-lisa .pass-val-stamp-badge {
+    border-color: #B38728 !important;
+    color: #FCF6BA !important;
+}
+
+/* Glitter Finish twinkles */
+.vip-backstage-pass.finish-glitter::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+        radial-gradient(circle, rgba(255,255,255,0.85) 1.5px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,255,255,0.6) 2px, transparent 2px),
+        radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size: 40px 40px, 60px 60px, 20px 20px;
+    background-position: 0 0, 15px 25px, 5px 8px;
+    opacity: 0.22;
+    pointer-events: none;
+    z-index: 9;
+    mix-blend-mode: screen;
+    animation: glitterTwinkle 2s ease-in-out infinite alternate;
+}
+@keyframes glitterTwinkle {
+    0% { opacity: 0.12; }
+    100% { opacity: 0.32; }
+}
