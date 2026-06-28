@@ -1,3 +1,4 @@
+
 /* 
    THE POLAROID CAPSULE - SYSTEM DESIGN STYLESHEET
    A premium warm-white/cream aesthetic themed interface
@@ -1877,6 +1878,7 @@ body.dark-mode .countdown-unit {
 }
 
 .target-count {
+    font-family: var(--font-sans);
     font-weight: 700;
     color: var(--color-primary);
 }
@@ -2159,16 +2161,16 @@ body.dark-mode .btn-theme-toggle {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-start; /* Start scrolling alignment from the top */
     padding-top: 40px;
-    pointer-events: none;
+    pointer-events: none; /* User can click through to items behind it */
     transition: var(--transition-smooth);
 }
 
 .photo-roll-track {
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Keep track height rigid for accurate animation percentages */
     animation: scrollUp 25s infinite linear;
 }
 
@@ -2177,7 +2179,7 @@ body.dark-mode .btn-theme-toggle {
         transform: translateY(0);
     }
     100% {
-        transform: translateY(-50%);
+        transform: translateY(-50%); /* Loop exactly half the list since we duplicated items */
     }
 }
 
@@ -2192,14 +2194,14 @@ body.dark-mode .btn-theme-toggle {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-end; /* Push text to bottom */
     position: relative;
     overflow: hidden;
     margin-bottom: 20px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent cards from collapsing on smaller heights */
 }
 
-/* Fallback placeholder visual elements */
+/* Fallback placeholder visual elements (hidden when image successfully overlays) */
 .roll-photo-card::before {
     content: '🖤💗';
     font-size: 1.6rem;
@@ -2222,12 +2224,12 @@ body.dark-mode .btn-theme-toggle {
     top: 8px;
     left: 8px;
     width: calc(100% - 16px);
-    height: calc(100% - 32px);
+    height: calc(100% - 32px); /* Leaves space for the bottom polaroid frame margin */
     object-fit: cover;
     border-radius: 2px;
     border: 1px solid rgba(0,0,0,0.05);
     background-color: var(--color-primary-light);
-    z-index: 2;
+    z-index: 2; /* Sits on top of the fallback emojis */
 }
 
 /* Hide the photo roll entirely on tablet & mobile screens to avoid overlap */
@@ -2729,6 +2731,7 @@ body.dark-mode .input-wrapper input:focus {
     border-color: var(--color-primary);
 }
 
+
 /* Global Hidden Utility Class */
 .hidden {
     display: none !important;
@@ -2779,53 +2782,1019 @@ body.dark-mode .load-more-container .btn-secondary:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
+
 /* ==========================================================================
-   LANYARD AND VIP PASS PREVIEW LAYOUTS
+   BLINK CARD MEMBERSHIP STYLES (Bottom-Drawer Studio Edition)
    ========================================================================== */
-.pass-creator-layout {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 32px;
-    align-items: start;
-    margin-top: 10px;
+
+/* Photo Editor Studio Layout */
+.photo-editor-studio {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft-lg);
 }
 
-@media (max-width: 900px) {
-    .pass-creator-layout {
-        grid-template-columns: 1fr;
-        gap: 24px;
+body.dark-mode .photo-editor-studio {
+    background-color: #1c1819;
+    border-color: #3d2d30;
+}
+
+/* 1. Editor Viewport (Canvas display) */
+.editor-viewport {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background-color: var(--color-bg-main);
+    min-height: 380px;
+    overflow: visible; /* Let stickers hang off card borders! */
+    position: relative;
+}
+
+body.dark-mode .editor-viewport {
+    background-color: #141112;
+}
+
+/* Canvas wrapper scale logic for small mobile screens */
+@media (max-width: 580px) {
+    .editor-viewport {
+        padding: 20px;
+        min-height: 280px;
+    }
+    .card-canvas-wrapper {
+        transform: scale(0.7);
+        transform-origin: center center;
+    }
+}
+@media (max-width: 420px) {
+    .editor-viewport {
+        padding: 10px;
+        min-height: 240px;
+    }
+    .card-canvas-wrapper {
+        transform: scale(0.6);
+        transform-origin: center center;
     }
 }
 
-.pass-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    text-align: left;
-    padding: 32px;
+/* 2. Bottom Drawer Panel */
+.editor-bottom-drawer {
+    padding: 24px 30px;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-bg-card);
+    min-height: 180px;
+    overflow-y: auto;
 }
 
+body.dark-mode .editor-bottom-drawer {
+    background-color: #1c1819;
+    border-color: #3d2d30;
+}
+
+.drawer-row-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 3. Navigation/Actions Bar */
+.editor-navigation-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 30px;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-bg-main);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+body.dark-mode .editor-navigation-bar {
+    background-color: #141112;
+    border-color: #3d2d30;
+}
+
+/* Tabs inside bottom bar */
+.toolbar-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.toolbar-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.toolbar-tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 18px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: 30px;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.toolbar-tab-btn:hover {
+    color: var(--color-text-main);
+    background-color: var(--color-bg-card);
+}
+
+.toolbar-tab-btn.active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Action buttons inside bottom bar */
+.toolbar-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Sticker panel wrapper */
+.sticker-panel-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* The Membership Card */
+.membership-card {
+    position: relative;
+    border-radius: 20px;
+    background-color: #121011;
+    border: 6px solid #FF7590;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px;
+    transition: box-shadow 0.3s ease, border-radius 0.3s ease, width 0.3s ease, height 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    transform-style: preserve-3d;
+}
+
+/* Card shapes (Horizontal Landscape) */
+.membership-card.shape-horizontal {
+    width: 480px;
+    height: 300px;
+}
+
+/* Fallback class for compatibility */
+.membership-card.shape-rectangle {
+    width: 480px;
+    height: 300px;
+}
+
+.membership-card.shape-square {
+    width: 380px;
+    height: 380px;
+    border-radius: 24px;
+}
+
+/* Born Pink Venom shape cutouts (Horizontal) */
+.membership-card.shape-venom {
+    width: 480px;
+    height: 300px;
+    clip-path: polygon(10% 0%, 90% 0%, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0% 85%, 0% 15%);
+    border-radius: 0px !important;
+}
+
+/* Fonts styling */
+.membership-card.font-sans { font-family: var(--font-sans); }
+.membership-card.font-serif { font-family: var(--font-serif); }
+.membership-card.font-handwritten { font-family: var(--font-handwritten); }
+
+/* Custom background patterns */
+.card-pattern-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+}
+
+/* Pink Plaid */
+.membership-card.pattern-plaid .card-pattern-overlay {
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.2) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255,255,255,0.2) 2px, transparent 2px);
+    background-size: 20px 20px;
+    opacity: 0.2;
+}
+
+/* Polka Dot */
+.membership-card.pattern-dots .card-pattern-overlay {
+    background-image: radial-gradient(rgba(255,255,255,0.3) 15%, transparent 16%);
+    background-size: 16px 16px;
+    opacity: 0.25;
+}
+
+/* Checkerboard */
+.membership-card.pattern-checker .card-pattern-overlay {
+    background-image: 
+        linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), 
+        linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.05) 75%), 
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.05) 75%);
+    background-size: 30px 30px;
+    background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
+    opacity: 0.2;
+}
+
+/* Hearts pattern */
+.membership-card.pattern-hearts .card-pattern-overlay {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.15) 20%, transparent 20%),
+                      radial-gradient(circle, rgba(255,255,255,0.15) 20%, transparent 20%);
+    background-size: 24px 24px;
+    background-position: 0 0, 12px 12px;
+    opacity: 0.25;
+}
+
+/* Lined Notepad pattern */
+.membership-card.pattern-ruled .card-pattern-overlay {
+    background-image: linear-gradient(rgba(255, 117, 144, 0.1) 1.5px, transparent 1.5px);
+    background-size: 100% 28px;
+    opacity: 0.85;
+}
+
+/* Centered Header Logo Block */
+.card-header-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px dashed rgba(255,255,255,0.15);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    z-index: 2;
+}
+
+.card-bp-logo {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 5px;
+    color: #FF7590;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.card-fan-club {
+    font-size: 0.55rem;
+    letter-spacing: 3.5px;
+    color: #FFFFFF !important;
+    opacity: 0.75;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 2px;
+}
+
+.card-blink-sub {
+    font-size: 0.5rem;
+    letter-spacing: 2px;
+    color: #FF7590;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 1px;
+}
+
+/* Main Content Area Split Grid */
+.card-main-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-grow: 1;
+    z-index: 2;
+    margin-top: 5px;
+}
+
+.card-info-side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.card-row {
+    display: flex;
+    align-items: center;
+    font-size: 0.72rem;
+}
+
+.card-label {
+    color: #FF7590;
+    font-weight: 800;
+    width: 75px;
+    letter-spacing: 0.8px;
+}
+
+.card-colon {
+    color: #FF7590;
+    margin-right: 12px;
+    font-weight: bold;
+}
+
+.card-value-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-value {
+    color: #FFFFFF !important;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+    min-width: 120px;
+}
+
+.card-underline {
+    height: 1.5px;
+    background-color: #FF7590;
+    width: 100%;
+    margin-top: 2px;
+    opacity: 0.6;
+}
+
+/* Right side graphic glow */
+.card-graphic-side {
+    width: 90px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-left: 20px;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 15%, transparent 16%);
+    background-size: 10px 10px;
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.bi-ping-bong-logo-glow {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.neon-svg {
+    filter: drop-shadow(0 0 6px rgba(255, 117, 144, 0.75));
+}
+
+/* Card Bottom Details Area */
+.card-bottom-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    border-top: 1px dashed rgba(255,255,255,0.15);
+    padding-top: 10px;
+    margin-top: 10px;
+    z-index: 2;
+}
+
+.card-tagline {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.card-tagline .font-handwritten {
+    font-size: 1.2rem;
+    color: #FF7590;
+    font-weight: 500;
+}
+
+.tagline-sub {
+    font-size: 0.45rem;
+    opacity: 0.65;
+    letter-spacing: 1px;
+    color: #FFFFFF !important;
+    text-transform: uppercase;
+}
+
+/* Barcode CSS design badge */
+.card-barcode-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #FF7590;
+    border-radius: 6px;
+    padding: 4px 10px;
+    width: 150px;
+    color: #000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.barcode-label {
+    font-size: 0.45rem;
+    font-weight: 800;
+    margin-bottom: 2px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.barcode-lines {
+    height: 18px;
+    width: 130px;
+    background: repeating-linear-gradient(90deg, 
+        #000000, #000000 2px, 
+        transparent 2px, transparent 4px, 
+        #000000 4px, #000000 6px
+    );
+}
+
+/* Member Signature Area (bottom right) */
+.card-sig-right {
+    width: 80px;
+    height: 35px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-sig-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Signature ink filters */
+.card-sig-right img.ink-black {
+    filter: brightness(0) contrast(1);
+}
+.card-sig-right img.ink-gold {
+    filter: invert(72%) sepia(51%) saturate(362%) hue-rotate(1deg) brightness(97%) contrast(92%);
+}
+.card-sig-right img.ink-pink {
+    filter: invert(53%) sepia(91%) saturate(996%) hue-rotate(313%) brightness(101%) contrast(101%);
+}
+
+/* Custom Scrollbar removals */
+.card-controls-tabs::-webkit-scrollbar {
+    display: none !important;
+}
+.card-controls-tabs {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* Card Finishes & Overlays */
+.card-holo-glare {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 4;
+    pointer-events: none;
+    mix-blend-mode: color-dodge;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Glossy light glare */
+.membership-card.finish-glossy + .card-holo-glare {
+    opacity: 0.35;
+    background: linear-gradient(105deg, 
+        transparent 40%, 
+        rgba(255, 255, 255, 0.4) 45%, 
+        rgba(255, 255, 255, 0.6) 48%, 
+        rgba(255, 255, 255, 0.4) 52%, 
+        transparent 60%
+    );
+    background-size: 200% 200%;
+    background-position: 150% 0%;
+}
+
+/* Glitter sheen overlay */
+.membership-card.finish-glitter + .card-holo-glare {
+    opacity: 0.25;
+    background-image: 
+        radial-gradient(circle, #fff 10%, transparent 11%),
+        radial-gradient(circle, #fff 5%, transparent 6%),
+        radial-gradient(circle, #fff 2%, transparent 3%);
+    background-size: 20px 20px, 45px 45px, 15px 15px;
+    background-position: 0 0, 10px 10px, 5px 5px;
+    animation: sparkle-bg 12s linear infinite;
+}
+
+/* Holographic prism sheen */
+.membership-card.finish-holo + .card-holo-glare {
+    opacity: 0.4;
+    background: linear-gradient(115deg, 
+        rgba(224, 195, 252, 0.5) 0%, 
+        rgba(142, 197, 252, 0.5) 30%, 
+        rgba(251, 194, 235, 0.5) 70%, 
+        rgba(224, 195, 252, 0.5) 100%
+    );
+    background-size: 200% 200%;
+    background-position: 150% 0%;
+    mix-blend-mode: overlay;
+}
+
+/* Card Holder Frames */
+.card-holder-frame {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Bunny ears frame overlay */
+.membership-card.frame-bunny::before {
+    content: '';
+    position: absolute;
+    top: -36px;
+    left: 45px;
+    width: 60px;
+    height: 50px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80"><path d="M20,70 Q0,30 20,10 Q35,30 25,70 Z M80,70 Q100,30 80,10 Q65,30 75,70 Z" fill="%23FFFFFF" stroke="%23FF7590" stroke-width="6"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 6;
+}
+
+/* Kitty chain frame overlay */
+.membership-card.frame-kitty::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 20"><circle cx="20" cy="8" r="4" fill="%23CCCCCC"/><line x1="20" y1="8" x2="60" y2="8" stroke="%23CCCCCC" stroke-width="2"/><circle cx="60" cy="8" r="4" fill="%23CCCCCC"/><line x1="60" y1="8" x2="100" y2="8" stroke="%23CCCCCC" stroke-width="2"/><circle cx="100" cy="8" r="4" fill="%23CCCCCC"/><line x1="100" y1="8" x2="140" y2="8" stroke="%23CCCCCC" stroke-width="2"/><circle cx="140" cy="8" r="4" fill="%23CCCCCC"/><line x1="140" y1="8" x2="180" y2="8" stroke="%23CCCCCC" stroke-width="2"/><circle cx="180" cy="8" r="4" fill="%23CCCCCC"/><line x1="180" y1="8" x2="220" y2="8" stroke="%23CCCCCC" stroke-width="2"/><circle cx="220" cy="8" r="4" fill="%23CCCCCC"/><line x1="220" y1="8" x2="260" y2="8" stroke="%23CCCCCC" stroke-width="2"/><circle cx="260" cy="8" r="4" fill="%23CCCCCC"/><path d="M135,-4 L145,-4 L140,8 Z M155,-4 L165,-4 L160,8 Z" fill="%23FF7590"/></svg>');
+    background-size: cover;
+    z-index: 6;
+}
+
+/* Fluffy cloud frame border mask overlay */
+.membership-card.frame-cloud {
+    border: 8px double #FFF0F2 !important;
+}
+
+/* Control Dashboard Column tabs */
+.card-controls-column {
+    display: flex;
+    flex-direction: column;
+    padding: 30px !important;
+    text-align: left;
+}
+
+.card-controls-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1.5px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.card-tab-btn {
+    background: none;
+    border: none;
+    padding: 8px 14px;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-tab-btn:hover {
+    color: var(--color-text-main);
+    background-color: var(--color-bg-main);
+}
+
+.card-tab-btn.active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+body.dark-mode .card-tab-btn.active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+/* Panels active swapping */
+.card-panel-content {
+    display: none;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.card-panel-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Grids selectors styling */
+.bias-selector-grid, .shape-selector-grid, .frame-selector-grid, .finish-selector-grid, .pattern-selector-grid, .font-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media(max-width: 480px) {
+    .bias-selector-grid, .shape-selector-grid, .frame-selector-grid, .finish-selector-grid, .pattern-selector-grid, .font-selector-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.bias-radio-option {
+    cursor: pointer;
+}
+
+.bias-radio-option input {
+    display: none;
+}
+
+.bias-radio-option .bias-badge {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    transition: var(--transition-smooth);
+}
+
+.bias-radio-option input:checked + .bias-badge {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Signature ink choice */
+.signature-ink-options {
+    display: flex;
+    gap: 16px;
+}
+
+.ink-option-radio {
+    cursor: pointer;
+}
+
+.ink-option-radio input {
+    display: none;
+}
+
+.ink-preview-dot {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: var(--transition-smooth);
+}
+
+.ink-preview-dot.ink-black { background-color: #111; }
+.ink-preview-dot.ink-gold { background-color: #d5a350; }
+.ink-preview-dot.ink-pink { background-color: #FF7590; }
+
+.ink-option-radio input:checked + .ink-preview-dot {
+    border-color: var(--color-text-main);
+    transform: scale(1.15);
+}
+
+/* Selector buttons styling */
+.btn-shape-toggle, .btn-frame-toggle, .btn-finish-toggle, .btn-pattern-toggle, .btn-font-toggle {
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-shape-toggle:hover, .btn-frame-toggle:hover, .btn-finish-toggle:hover, .btn-pattern-toggle:hover, .btn-font-toggle:hover {
+    color: var(--color-text-main);
+    border-color: var(--color-text-muted);
+}
+
+.btn-shape-toggle.active, .btn-frame-toggle.active, .btn-finish-toggle.active, .btn-pattern-toggle.active, .btn-font-toggle.active {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Custom Colors picker list */
+.color-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: var(--color-bg-main);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.color-picker-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.color-picker-item input[type="color"] {
+    border: none;
+    outline: none;
+    background: none;
+    width: 48px;
+    height: 28px;
+    cursor: pointer;
+}
+
+/* Sticker Category tray headers */
+.sticker-tray-categories {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.btn-tray-cat {
+    background: none;
+    border: none;
+    padding: 6px 12px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: 20px;
+    transition: var(--transition-smooth);
+    white-space: nowrap;
+}
+
+.btn-tray-cat:hover {
+    color: var(--color-text-main);
+    background-color: var(--color-bg-main);
+}
+
+.btn-tray-cat.active {
+    background-color: var(--color-text-main);
+    color: white;
+}
+
+body.dark-mode .btn-tray-cat.active {
+    background-color: #FFEAEF;
+    color: #121011;
+}
+
+/* Stickers grid display */
+.stickers-tray-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 4px;
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.tray-sticker-item {
+    aspect-ratio: 1 / 1;
+    background-color: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.tray-sticker-item:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-soft-sm);
+    border-color: var(--color-primary);
+}
+
+.tray-sticker-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    user-drag: none;
+    -webkit-user-drag: none;
+}
+
+/* Dark Mode card generator support overrides */
+body.dark-mode .membership-card {
+    border-color: #1C1819;
+}
+body.dark-mode .card-controls-column {
+    background-color: #1C1819;
+    border-color: #3D2D30;
+}
+body.dark-mode .card-controls-tabs {
+    border-color: #3D2D30;
+}
+body.dark-mode .btn-shape-toggle, 
+body.dark-mode .btn-frame-toggle, 
+body.dark-mode .btn-finish-toggle, 
+body.dark-mode .btn-pattern-toggle, 
+body.dark-mode .btn-font-toggle,
+body.dark-mode .bias-radio-option .bias-badge,
+body.dark-mode .color-picker-list,
+body.dark-mode .stickers-tray-grid {
+    background-color: #141112;
+    border-color: #3D2D30;
+}
+body.dark-mode .btn-tray-cat:hover {
+    background-color: #2D181B;
+}
+body.dark-mode .tray-sticker-item {
+    background-color: #2D181B;
+    border-color: #3D2D30;
+}
+body.dark-mode .tray-sticker-item:hover {
+    border-color: var(--color-primary);
+}
+body.dark-mode .signature-ink-options .ink-option-radio input:checked + .ink-preview-dot {
+    border-color: #FFF0F2;
+}
+
+/* ==========================================================================
+   VIP BACKSTAGE PASS GENERATOR STYLES
+   ========================================================================== */
+
+.pass-creator-layout {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
+/* Control Panel */
+.pass-controls {
+    flex: 1;
+    min-width: 320px;
+    max-width: 480px;
+    padding: 24px;
+}
+
+.bias-selector-pass {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-bias-pass {
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition-smooth);
+}
+
+.btn-bias-pass:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.btn-bias-pass.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-soft-sm);
+}
+
+.bias-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.bias-dot.ot4 { background-color: var(--color-primary); }
+.bias-dot.jisoo { background-color: #8C65FF; } /* Purple */
+.bias-dot.jennie { background-color: #B3003F; } /* Ruby Red */
+.bias-dot.rose { background-color: #FF80A6; } /* Pastel Pink */
+.bias-dot.lisa { background-color: #FFC800; } /* Yellow */
+
+.photo-source-selection {
+    margin-top: 8px;
+}
+
+.photo-divider {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: 12px 0;
+    position: relative;
+}
+
+.concept-thumbnails {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.btn-thumbnail-pick {
+    width: 52px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--color-border);
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    transition: var(--transition-smooth);
+}
+
+.btn-thumbnail-pick:hover {
+    transform: scale(1.08);
+}
+
+.btn-thumbnail-pick.active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 8px var(--color-primary);
+    transform: scale(1.08);
+}
+
+.btn-thumbnail-pick img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Lanyard Elements */
 .pass-preview-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
-    padding-top: 50px;
+    max-width: 360px;
     width: 100%;
 }
 
 .lanyard-strap {
-    position: absolute;
-    top: 0;
-    width: 24px;
-    height: 60px;
-    background-color: #1E1517; /* Dark strap */
-    border-left: 2px solid #FF7590;
-    border-right: 2px solid #FF7590;
-    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+    margin-bottom: -15px;
 }
 
 .lanyard-hole {
@@ -3042,6 +4011,31 @@ body.dark-mode .load-more-container .btn-secondary:hover {
     justify-content: center;
     margin-top: auto;
 }
+
+.pass-barcode-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.85;
+}
+
+.barcode-graphic-simulated {
+    display: flex;
+    height: 24px;
+    align-items: stretch;
+    background-color: transparent;
+}
+
+.barcode-graphic-simulated .bar {
+    width: 2px;
+    background-color: var(--color-text-main);
+    margin-right: 1.5px;
+}
+
+.barcode-graphic-simulated .bar-sm { width: 1.5px; }
+.barcode-graphic-simulated .bar-md { width: 3.5px; margin-right: 2px; }
+.barcode-graphic-simulated .bar-lg { width: 5.5px; margin-right: 2.5px; }
 
 .pass-serial-no {
     font-family: monospace;
@@ -3318,3 +4312,8 @@ body.dark-mode .btn-thumbnail-pick.active {
     0% { opacity: 0.12; }
     100% { opacity: 0.32; }
 }
+
+
+
+
+
