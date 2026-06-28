@@ -2941,7 +2941,11 @@ function updatePassLabels() {
     const valBias = document.getElementById('pass-val-bias');
     const badgeInput = document.getElementById('pass-input-badge');
     if (valBias && badgeInput) {
-        valBias.textContent = selectedBiasPass.toUpperCase() + ' / ' + badgeInput.value;
+        let displayBias = selectedBiasPass.toUpperCase();
+        if (selectedBiasPass === 'rose') {
+            displayBias = 'ROSÉ';
+        }
+        valBias.textContent = displayBias + ' / ' + badgeInput.value;
     }
 }
 
