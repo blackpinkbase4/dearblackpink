@@ -35,9 +35,11 @@ const viewCountdown = document.getElementById('view-countdown');
 const viewGallery = document.getElementById('view-gallery');
 const viewMediaHub = document.getElementById('view-media-hub');
 const viewQuiz = document.getElementById('view-quiz');
+const viewPass = document.getElementById('view-pass-generator');
 const navCapsule = document.getElementById('nav-capsule');
 const navQuiz = document.getElementById('nav-quiz');
 const navMediaHub = document.getElementById('nav-media-hub');
+const navPass = document.getElementById('nav-pass');
 
 // BLINK Quiz Elements
 const quizActiveCard = document.getElementById('quiz-active-card');
@@ -219,6 +221,7 @@ function switchView(targetView) {
 // Setup all event listeners
 function setupEventListeners() {
     // Lock Simulated Vault click listener
+     initPassListeners();
     adminLockBtn.addEventListener('click', () => {
         localStorage.setItem('capsule_simulated_bypass', 'false');
         adminLockBtn.classList.add('hidden');
@@ -510,6 +513,36 @@ function setupEventListeners() {
         switchView(viewQuiz);
         initQuizState(); // Reset and load quiz when tab clicked
     });
+    /* INSERT THIS BLOCK HERE: */
+    if (navPass) {
+        navPass.addEventListener('click', () => {
+            updateHeaderNavState(navPass);
+            
+            // Pause music if it's currently playing
+            const audio = document.getElementById('ambient-audio');
+            const playBtn = document.getElementById('btn-player-play');
+            const vinyl = document.getElementById('vinyl-disc');
+            const playerWidget = document.getElementById('music-player');
+            
+            if (audio && !audio.paused) {
+                wasMusicPlayingBeforeSwitch = true;
+                audio.pause();
+                if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                if (vinyl) vinyl.classList.remove('playing');
+            } else {
+                wasMusicPlayingBeforeSwitch = false;
+            }
+            
+            // Hide music player widget on VIP Pass page
+            if (playerWidget) {
+                playerWidget.style.display = 'none';
+            }
+            
+            switchView(viewPass);
+            initPassState();
+        });
+    }
+    
 
     navMediaHub.addEventListener('click', () => {
         updateHeaderNavState(navMediaHub);
@@ -1910,3 +1943,549 @@ window.addEventListener('appinstalled', (evt) => {
     }
     showToast("Dear BLACKPINK installed on your home screen! 🖤💗");
 });
+// ==========================================================================
+// VIP BACKSTAGE PASS GENERATOR ENGINE
+// ==========================================================================
+
+let selectedBiasPass = 'ot4';
+let selectedPhotoSrc = 'bp_pic1.jpg';
+let customPhotoDataUrl = null;
+let selectedPassBg = '#121212';
+let selectedPassFinish = 'glossy';
+
+function updatePassLabels() {
+    const valBias = document.getElementById('pass-val-bias');
+    const badgeInput = document.getElementById('pass-input-badge');
+    if (valBias && badgeInput) {
+        valBias.textContent = selectedBiasPass.toUpperCase() + ' / ' + badgeInput.value;
+    }
+}
+
+function initPassState() {
+    const nameInput = document.getElementById('pass-input-name');
+    if (nameInput) {
+        nameInput.value = '';
+    }
+    const valName = document.getElementById('pass-val-name');
+    if (valName) {
+        valName.textContent = 'YOUR NAME HERE';
+    }
+
+    // Reset bias state
+    selectedBiasPass = 'ot4';
+    updatePassTheme('ot4');
+    
+    const biasBtns = document.querySelectorAll('.btn-bias-pass');
+    biasBtns.forEach(btn => {
+        if (btn.dataset.bias === 'ot4') {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Reset photo pickers
+    selectedPhotoSrc = 'bp_pic1.jpg';
+    customPhotoDataUrl = null;
+    const previewPhoto = document.getElementById('pass-preview-photo');
+    if (previewPhoto) {
+        previewPhoto.src = 'bp_pic1.jpg';
+    }
+    const thumbnails = document.querySelectorAll('.btn-thumbnail-pick');
+    thumbnails.forEach(thumb => {
+        if (thumb.dataset.imgSrc === 'bp_pic1.jpg') {
+            thumb.classList.add('active');
+        } else {
+            thumb.classList.remove('active');
+        }
+    });
+
+    // Reset fields
+    const songInput = document.getElementById('pass-input-song');
+    const valSong = document.getElementById('pass-val-song');
+    if (songInput && valSong) {
+        songInput.value = 'STAY';
+        valSong.textContent = 'STAY';
+    }
+
+    const badgeInput = document.getElementById('pass-input-badge');
+    const valStamp = document.getElementById('pass-val-stamp');
+    if (badgeInput && valStamp) {
+        badgeInput.value = 'Born Pink Era';
+        valStamp.textContent = 'Born Pink Era 🌸';
+    }
+
+    // Reset card background color to absolute black and finish to glossy
+    selectedPassBg = '#121212';
+    selectedPassFinish = 'glossy';
+    const card = document.getElementById('vip-pass-card');
+    if (card) {
+        card.style.backgroundColor = '#121212';
+        card.classList.remove('finish-foil', 'finish-glitter');
+        card.classList.add('finish-glossy');
+    }
+    const finishBtns = document.querySelectorAll('.btn-finish-pass');
+    finishBtns.forEach(btn => {
+        if (btn.dataset.finish === 'glossy') {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    updatePassLabels();
+}
+
+function updatePassTheme(bias) {
+    const card = document.getElementById('vip-pass-card');
+    if (!card) return;
+
+    // Remove old classes
+    card.classList.remove('theme-ot4', 'theme-jisoo', 'theme-jennie', 'theme-rose', 'theme-lisa');
+    card.classList.add(`theme-${bias}`);
+}
+
+function initPassListeners() {
+    // Pass finish selector listener
+    const finishBtns = document.querySelectorAll('.btn-finish-pass');
+    finishBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            finishBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedPassFinish = btn.dataset.finish;
+            
+            const card = document.getElementById('vip-pass-card');
+            if (card) {
+                card.classList.remove('finish-glossy', 'finish-foil', 'finish-glitter');
+                card.classList.add(`finish-${selectedPassFinish}`);
+            }
+        });
+    });
+
+    // Bias selection listener
+    const biasBtns = document.querySelectorAll('.btn-bias-pass');
+    biasBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            biasBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedBiasPass = btn.dataset.bias;
+            updatePassTheme(selectedBiasPass);
+            updatePassLabels();
+        });
+    });
+
+    // Name text sync
+    const nameInput = document.getElementById('pass-input-name');
+    const valName = document.getElementById('pass-val-name');
+    if (nameInput && valName) {
+        nameInput.addEventListener('input', () => {
+            valName.textContent = nameInput.value.trim().toUpperCase() || 'YOUR NAME HERE';
+        });
+    }
+
+    // Anthem select sync
+    const songInput = document.getElementById('pass-input-song');
+    const valSong = document.getElementById('pass-val-song');
+    if (songInput && valSong) {
+        songInput.addEventListener('change', () => {
+            valSong.textContent = songInput.value;
+        });
+    }
+
+    // Stamp select sync
+    const badgeInput = document.getElementById('pass-input-badge');
+    const valStamp = document.getElementById('pass-val-stamp');
+    if (badgeInput && valStamp) {
+        badgeInput.addEventListener('change', () => {
+            let emoji = ' 🌸';
+            if (badgeInput.value === 'Square One Era') emoji = ' ⬛';
+            if (badgeInput.value === 'Square Two Era') emoji = ' 🟥';
+            if (badgeInput.value === 'As If It\'s Your Last Era') emoji = ' 💖';
+            if (badgeInput.value === 'Square Up Era') emoji = ' 🟦';
+            if (badgeInput.value === 'Kill This Love Era') emoji = ' 💔';
+            if (badgeInput.value === 'The Album Era') emoji = ' 👑';
+            if (badgeInput.value === 'Born Pink Era') emoji = ' 🌸';
+            if (badgeInput.value === 'DEADLINE Era') emoji = ' ⏳';
+            
+            valStamp.textContent = badgeInput.value + emoji;
+            updatePassLabels();
+        });
+    }
+
+    // Preloaded photo picks
+    const thumbnails = document.querySelectorAll('.btn-thumbnail-pick');
+    const previewPhoto = document.getElementById('pass-preview-photo');
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+            thumbnails.forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+            selectedPhotoSrc = thumb.dataset.imgSrc;
+            customPhotoDataUrl = null;
+            if (previewPhoto) previewPhoto.src = selectedPhotoSrc;
+        });
+    });
+
+    // Upload custom photo handler
+    const uploadTrigger = document.getElementById('btn-pass-upload-trigger');
+    const fileInput = document.getElementById('pass-photo-upload');
+    if (uploadTrigger && fileInput) {
+        uploadTrigger.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                customPhotoDataUrl = event.target.result;
+                if (previewPhoto) previewPhoto.src = customPhotoDataUrl;
+                // Deselect preloaded thumbnails
+                thumbnails.forEach(t => t.classList.remove('active'));
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Download action triggers share modal
+    const downloadBtn = document.getElementById('btn-pass-download');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            downloadPassAsPNG();
+            
+            // Show share modal dialog after initiating download
+            const shareModal = document.getElementById('pass-share-modal');
+            if (shareModal) {
+                shareModal.classList.add('active');
+                
+                const nameText = document.getElementById('pass-val-name').textContent;
+                const xLink = document.getElementById('btn-share-modal-x');
+                const waLink = document.getElementById('btn-share-modal-wa');
+                const copyBtn = document.getElementById('btn-share-modal-copy');
+                
+                const shareText = encodeURIComponent(`Just designed my personalized BLACKPINK VIP Concert Pass! Create yours at Dear BLACKPINK 🎫✨ #BLACKPINK #BLINK`);
+                
+                if (xLink) xLink.href = `https://twitter.com/intent/tweet?text=${shareText}`;
+                if (waLink) waLink.href = `https://api.whatsapp.com/send?text=${shareText}`;
+                
+                if (copyBtn) {
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(window.location.href);
+                        showToast("Link copied to clipboard!");
+                    };
+                }
+                
+                const closeBtn = document.getElementById('pass-share-close-btn');
+                if (closeBtn) {
+                    closeBtn.onclick = () => shareModal.classList.remove('active');
+                }
+                
+                const cancelBtn = document.getElementById('btn-share-modal-cancel');
+                if (cancelBtn) {
+                    cancelBtn.onclick = () => shareModal.classList.remove('active');
+                }
+            }
+        });
+    }
+
+    // Share on X (Twitter) (Control Panel Share Button)
+    const shareBtn = document.getElementById('btn-pass-share-x');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            const text = encodeURIComponent("Just designed my custom BLACKPINK VIP Backstage Pass for the 10th Anniversary Time Capsule! Create yours at Dear BLACKPINK 🎫✨ #BLACKPINK #BLINK");
+            const shareUrl = `https://twitter.com/intent/tweet?text=${text}`;
+            window.open(shareUrl, '_blank');
+        });
+    }
+}
+
+// Helper to draw an image inside a Canvas region mimicking "object-fit: cover"
+function drawCoverImage(ctx, img, dx, dy, dWidth, dHeight) {
+    const imgWidth = img.naturalWidth || img.width;
+    const imgHeight = img.naturalHeight || img.height;
+    
+    const imageAspectRatio = imgWidth / imgHeight;
+    const canvasRegionAspectRatio = dWidth / dHeight;
+    
+    let sx, sy, sWidth, sHeight;
+    
+    if (imageAspectRatio > canvasRegionAspectRatio) {
+        // Image is wider than target aspect ratio (crop horizontally)
+        sHeight = imgHeight;
+        sWidth = imgHeight * canvasRegionAspectRatio;
+        sx = (imgWidth - sWidth) / 2;
+        sy = 0;
+    } else {
+        // Image is taller than target aspect ratio (crop vertically)
+        sWidth = imgWidth;
+        sHeight = imgWidth / canvasRegionAspectRatio;
+        sx = 0;
+        sy = (imgHeight - sHeight) / 2;
+    }
+    
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+}
+
+// Draw and download backstage pass lanyard
+function downloadPassAsPNG() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1280;
+    canvas.height = 1920;
+    const ctx = canvas.getContext('2d');
+    
+    // Enable high-quality anti-aliasing
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    // Get color themes
+    let borderClr = '#FF7590';
+    let textAccent = '#FF7590';
+    let photoBg = '#1E1A1B';
+    
+    if (selectedBiasPass === 'jisoo') {
+        borderClr = '#8F66FF';
+        textAccent = '#AC92FF';
+        photoBg = '#17151E';
+    } else if (selectedBiasPass === 'jennie') {
+        borderClr = '#FF1E56';
+        textAccent = '#FF3E70';
+        photoBg = '#1E1517';
+    } else if (selectedBiasPass === 'rose') {
+        borderClr = '#FFA6C9';
+        textAccent = '#FFA6C9';
+        photoBg = '#1E1618';
+    } else if (selectedBiasPass === 'lisa') {
+        borderClr = '#FFD000';
+        textAccent = '#FFE066';
+        photoBg = '#1E1E14';
+    }
+
+    // Set finish colors
+    let cardBorderClr = borderClr;
+    let cardTextAccent = textAccent;
+    
+    if (selectedPassFinish === 'foil') {
+        // High quality gold foil linear gradient
+        const goldGrad = ctx.createLinearGradient(40, 120, 1240, 1880);
+        goldGrad.addColorStop(0, '#BF953F');
+        goldGrad.addColorStop(0.25, '#FCF6BA');
+        goldGrad.addColorStop(0.5, '#B38728');
+        goldGrad.addColorStop(0.75, '#FBF5B7');
+        goldGrad.addColorStop(1, '#AA771C');
+        cardBorderClr = goldGrad;
+        cardTextAccent = goldGrad;
+    }
+
+    // Clear background outer margin (transparent border region)
+    ctx.clearRect(0, 0, 1280, 1920);
+
+    // Draw fabric lanyard strap running off the top
+    ctx.fillStyle = '#1E1517'; // dark charcoal
+    ctx.fillRect(616, 0, 48, 100);
+    // Draw vertical pink/magenta accent stripe down middle of lanyard strap
+    ctx.fillStyle = '#FF7590';
+    ctx.fillRect(636, 0, 8, 100);
+
+    // Draw metallic silver clip hooking into the slot
+    ctx.fillStyle = '#7F7F7F'; // dark silver border
+    ctx.fillRect(600, 78, 80, 44);
+    ctx.fillStyle = '#D3D3D3'; // shiny metallic body
+    ctx.fillRect(604, 82, 72, 36);
+    
+    // Draw card background inset (40px margins, offset to start at y=120, perfect rectangle)
+    ctx.fillStyle = '#121212';
+    ctx.fillRect(40, 120, 1200, 1760);
+
+    // Draw outer pass border inset (perfect rectangle, 24px thickness)
+    ctx.lineWidth = 24;
+    ctx.strokeStyle = cardBorderClr;
+    ctx.strokeRect(40, 120, 1200, 1760);
+
+    // Draw lanyard punched slot cutout at top center of card
+    ctx.fillStyle = '#050505';
+    ctx.beginPath();
+    ctx.ellipse(640, 170, 48, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#2F2F2F';
+    ctx.stroke();
+
+    // Draw Header Tag (inset, soft pink label)
+    ctx.fillStyle = '#FF8FA3';
+    ctx.font = 'bold 32px "Inter", sans-serif';
+    ctx.fillText('10TH ANNIVERSARY', 120, 260);
+
+    // Draw Logo Title (inset, high contrast white)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 72px "Playfair Display", serif';
+    ctx.fillText('Dear BLACKPINK', 120, 350);
+
+    // Draw VIP ACCESS badge (inset, rounded)
+    ctx.fillStyle = (selectedPassFinish === 'foil') ? cardBorderClr : textAccent;
+    ctx.beginPath();
+    ctx.roundRect(880, 210, 280, 84, 16);
+    ctx.fill();
+
+    ctx.fillStyle = (selectedPassFinish === 'foil') ? '#121212' : '#FFFFFF';
+    ctx.font = 'bold 32px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('VIP ACCESS', 1020, 262);
+    ctx.textAlign = 'left'; // Restore
+
+    // Draw dashed header separator
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = cardBorderClr;
+    ctx.setLineDash([24, 16]);
+    ctx.beginPath();
+    ctx.moveTo(120, 410);
+    ctx.lineTo(1160, 410);
+    ctx.stroke();
+    ctx.setLineDash([]); // Reset
+
+    // Draw photo frame background (inset, perfect rectangle)
+    ctx.fillStyle = photoBg;
+    ctx.fillRect(120, 460, 1040, 760);
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = cardBorderClr;
+    ctx.strokeRect(120, 460, 1040, 760);
+
+    // Draw profile photo (inset, perfect rectangle cropping)
+    const previewImg = document.getElementById('pass-preview-photo');
+    if (previewImg) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(124, 464, 1032, 752);
+        ctx.clip();
+        drawCoverImage(ctx, previewImg, 124, 464, 1032, 752);
+        ctx.restore();
+    }
+
+    // Draw holographic disk seal on photo
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.beginPath();
+    ctx.arc(1040, 1100, 64, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+
+    // Details Rows
+    const nameText = document.getElementById('pass-val-name').textContent;
+    const stampText = document.getElementById('pass-val-stamp').textContent;
+    const songText = document.getElementById('pass-val-song').textContent;
+    const biasName = document.getElementById('pass-val-bias').textContent;
+
+    // Row 1 details
+    ctx.fillStyle = '#A0A0A0';
+    ctx.font = 'bold 32px "Inter", sans-serif';
+    ctx.fillText('VIP NAME', 120, 1310);
+    ctx.fillText('STAMP', 720, 1310);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 48px "Inter", sans-serif';
+    ctx.fillText(nameText, 120, 1390);
+
+    // Draw rubber stamp style badge on canvas for stamp Text
+    ctx.save();
+    ctx.translate(900, 1390);
+    ctx.rotate(-8 * Math.PI / 180);
+    
+    // Stamp box
+    ctx.strokeStyle = cardTextAccent;
+    ctx.lineWidth = 8;
+    ctx.strokeRect(-180, -50, 360, 100);
+    ctx.lineWidth = 3;
+    ctx.strokeRect(-188, -58, 376, 116);
+    
+    // Stamp text inside rubber badge
+    ctx.fillStyle = cardTextAccent;
+    ctx.font = 'bold 26px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(stampText.toUpperCase(), 0, 0);
+    
+    ctx.restore();
+
+    // Row 2 details
+    ctx.fillStyle = '#A0A0A0';
+    ctx.font = 'bold 32px "Inter", sans-serif';
+    ctx.fillText('FAVORITE SONG', 120, 1530);
+    ctx.fillText('BIAS GROUP', 720, 1530);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 44px "Inter", sans-serif';
+    ctx.fillText(songText, 120, 1610);
+
+    ctx.fillStyle = cardTextAccent;
+    ctx.font = 'bold 44px "Inter", sans-serif';
+    ctx.fillText(biasName, 720, 1610);
+
+    // Dashed footer separator
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = cardBorderClr;
+    ctx.setLineDash([24, 16]);
+    ctx.beginPath();
+    ctx.moveTo(120, 1690);
+    ctx.lineTo(1160, 1690);
+    ctx.stroke();
+    ctx.setLineDash([]); // Reset
+
+    // Draw Spotify QR Code
+    const qrX = 120;
+    const qrY = 1730;
+    
+    // Background card for QR code
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(qrX - 8, qrY - 8, 148, 148);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = cardBorderClr;
+    ctx.strokeRect(qrX - 8, qrY - 8, 148, 148);
+    
+    const qrImg = document.getElementById('preview-spotify-qr-img');
+    if (qrImg) {
+        ctx.drawImage(qrImg, qrX, qrY, 132, 132);
+    }
+
+    // Draw Spotify Scan label next to QR code
+    ctx.fillStyle = cardTextAccent;
+    ctx.font = 'bold 32px "Inter", sans-serif';
+    ctx.fillText('SPOTIFY SCAN PASS', 720, 1785);
+
+    // Draw serial number
+    ctx.fillStyle = '#A0A0A0';
+    ctx.font = '32px monospace';
+    ctx.fillText('BP-20260807-VIP', 720, 1845);
+
+    // Draw premium diagonal hologram sheen overlay across the entire card
+    const sheen = ctx.createLinearGradient(40, 120, 1240, 1880);
+    sheen.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    sheen.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
+    sheen.addColorStop(0.42, 'rgba(255, 255, 255, 0.06)');
+    sheen.addColorStop(0.45, 'rgba(255, 255, 255, 0.12)');
+    sheen.addColorStop(0.48, 'rgba(255, 182, 193, 0.08)'); // soft pink shine
+    sheen.addColorStop(0.51, 'rgba(180, 240, 255, 0.08)'); // soft cyan shine
+    sheen.addColorStop(0.55, 'rgba(255, 255, 255, 0.04)');
+    sheen.addColorStop(0.62, 'rgba(255, 255, 255, 0)');
+    sheen.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = sheen;
+    ctx.fillRect(40, 120, 1200, 1760);
+
+    // Draw sparkling diamond glitter overlay if glitter finish is active
+    if (selectedPassFinish === 'glitter') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        const seed = nameText.length || 7;
+        for (let i = 0; i < 150; i++) {
+            const x = 40 + ((Math.sin(i * 12.3 + seed) + 1) / 2) * 1200;
+            const y = 120 + ((Math.cos(i * 45.6 + seed) + 1) / 2) * 1760;
+            const size = ((Math.sin(i * 78.9) + 1) / 2) * 4 + 1.5;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Download PNG
+    const link = document.createElement('a');
+    link.download = `Dear_BLACKPINK_VIP_Pass_${nameText.replace(/\s+/g, '_')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
