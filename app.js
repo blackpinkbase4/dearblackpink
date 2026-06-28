@@ -28,6 +28,43 @@ const SEED_LETTERS = [];
 // Initial Seed Media Creations (open all time, SVG graphics & video edits)
 const SEED_MEDIA = [];
 
+// BLINK Card Membership States
+const SYSTEM_STICKERS = {
+    group: Array.from({ length: 10 }, (_, i) => `stickers/group/${i + 1}.png`),
+    jisoo: Array.from({ length: 10 }, (_, i) => `stickers/jisoo/${i + 1}.png`),
+    jennie: Array.from({ length: 10 }, (_, i) => `stickers/jennie/${i + 1}.png`),
+    rose: Array.from({ length: 10 }, (_, i) => `stickers/rose/${i + 1}.png`),
+    lisa: Array.from({ length: 10 }, (_, i) => `stickers/lisa/${i + 1}.png`),
+    deco: Array.from({ length: 15 }, (_, i) => `stickers/deco/${i + 1}.png`),
+    myphotos: []
+};
+
+const BIAS_SIGNATURES = {
+    jisoo: 'signatures/jisoo.png',
+    jennie: 'signatures/jennie.png',
+    rose: 'signatures/rose.png',
+    lisa: 'signatures/lisa.png'
+};
+
+let activeCardShape = 'rectangle';
+let activeHolderFrame = 'none';
+let activeCardFinish = 'matte';
+let activeCardPattern = 'ruled';
+let activeCardFont = 'serif';
+let cardPlacedStickers = [];
+let selectedStickerId = null;
+let activeStickerAction = null; // 'drag', 'rotate-scale'
+let activeStickerEl = null;
+let dragStartX = 0;
+let dragStartY = 0;
+let stickerStartLeft = 0;
+let stickerStartTop = 0;
+let stickerStartWidth = 0;
+let stickerStartHeight = 0;
+let stickerStartRotation = 0;
+let stickerCenterPointerDist = 0;
+let stickerCenterPointerAngle = 0;
+
 // Elements
 const viewGatekeeper = document.getElementById('view-gatekeeper');
 const viewWrite = document.getElementById('view-write');
@@ -59,6 +96,28 @@ const btnQuizRestart = document.getElementById('btn-quiz-restart');
 const shareXModal = document.getElementById('share-x-modal');
 const btnShareXPost = document.getElementById('btn-share-x-post');
 const btnShareXClose = document.getElementById('btn-share-x-close');
+
+const viewCardGenerator = document.getElementById('view-card-generator');
+const navCardGenerator = document.getElementById('nav-card-generator');
+const cardCanvasWrapper = document.getElementById('card-canvas-wrapper');
+const membershipCard = document.getElementById('membership-card');
+const cardValId = document.getElementById('card-val-id');
+const cardValName = document.getElementById('card-val-name');
+const cardValDate = document.getElementById('card-val-date');
+const cardBiasSignature = document.getElementById('card-bias-signature');
+const cardStickerCanvas = document.getElementById('card-sticker-canvas');
+const stickersTrayGrid = document.getElementById('stickers-tray-grid');
+const customStickerInput = document.getElementById('custom-sticker-input');
+const btnUploadCustomSticker = document.getElementById('btn-upload-custom-sticker-nav');
+const btnDownloadCard = document.getElementById('btn-download-card');
+const btnShareCard = document.getElementById('btn-share-card');
+
+const memberNicknameInput = document.getElementById('member-nickname-input');
+const memberDateInput = document.getElementById('member-date-input');
+const colorBgPicker = document.getElementById('color-bg-picker');
+const colorBorderPicker = document.getElementById('color-border-picker');
+const colorLinesPicker = document.getElementById('color-lines-picker');
+const colorTextPicker = document.getElementById('color-text-picker');
 
 const gatekeeperForm = document.getElementById('gatekeeper-form');
 const senderNicknameInput = document.getElementById('sender-nickname');
@@ -184,6 +243,21 @@ window.addEventListener('DOMContentLoaded', () => {
     renderMediaShowcase(true);
 
     // Register Event Listeners
+        // Init Card Generator values
+    if (cardValId) {
+        cardValId.textContent = 'BP-10YR-' + Math.floor(1000 + Math.random() * 9000);
+    }
+    updateCardBiasSignature();
+    renderStickerTray('group');
+    
+    // Sync default input values on page load
+    if (memberNicknameInput && cardValName) {
+        cardValName.textContent = memberNicknameInput.value.trim() || '';
+    }
+    if (memberDateInput && cardValDate) {
+        cardValDate.textContent = memberDateInput.value || '';
+    }
+
     setupEventListeners();
 });
 
@@ -206,7 +280,7 @@ function navigateInitialView() {
 }
 
 function switchView(targetView) {
-    if (targetView !== viewMediaHub && targetView !== viewQuiz) {
+    if (targetView !== viewMediaHub && targetView !== viewQuiz && targetView !== viewPass) {
         currentCapsuleView = targetView;
     }
 
@@ -220,8 +294,8 @@ function switchView(targetView) {
 
 // Setup all event listeners
 function setupEventListeners() {
+    initPassListeners();
     // Lock Simulated Vault click listener
-     initPassListeners();
     adminLockBtn.addEventListener('click', () => {
         localStorage.setItem('capsule_simulated_bypass', 'false');
         adminLockBtn.classList.add('hidden');
@@ -336,6 +410,7 @@ function setupEventListeners() {
         // Update labels
         badgeSender.textContent = currentUser.sender;
         badgeRecipient.textContent = currentUser.recipient;
+        
         
         // Move to writing screen
         switchView(viewWrite);
@@ -480,6 +555,7 @@ function setupEventListeners() {
         navCapsule.classList.remove('active');
         navQuiz.classList.remove('active');
         navMediaHub.classList.remove('active');
+        if (navPass) navPass.classList.remove('active');
         activeLink.classList.add('active');
     }
 
@@ -493,7 +569,7 @@ function setupEventListeners() {
         const playBtn = document.getElementById('btn-player-play');
         const vinyl = document.getElementById('vinyl-disc');
         if (audio && wasMusicPlayingBeforeSwitch) {
-            audio.play().then(() => {
+            (audio.play() || Promise.resolve()).then(() => {
                 if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 if (vinyl) vinyl.classList.add('playing');
             }).catch(e => console.log("Failed to autoplay Stay song:", e));
@@ -507,13 +583,15 @@ function setupEventListeners() {
         switchView(currentCapsuleView);
     });
 
+
+
     navQuiz.addEventListener('click', () => {
         updateHeaderNavState(navQuiz);
         restoreMusicIfSwitchingBack();
         switchView(viewQuiz);
         initQuizState(); // Reset and load quiz when tab clicked
     });
-    /* INSERT THIS BLOCK HERE: */
+
     if (navPass) {
         navPass.addEventListener('click', () => {
             updateHeaderNavState(navPass);
@@ -542,7 +620,6 @@ function setupEventListeners() {
             initPassState();
         });
     }
-    
 
     navMediaHub.addEventListener('click', () => {
         updateHeaderNavState(navMediaHub);
@@ -570,6 +647,7 @@ function setupEventListeners() {
         switchView(viewMediaHub);
     });
 
+
     // PWA Install Button Click Handler
     if (btnInstallApp) {
         btnInstallApp.addEventListener('click', () => {
@@ -588,6 +666,7 @@ function setupEventListeners() {
             });
         });
     }
+
 
     // File Drag and Drop / Selection listeners
     mediaDropzone.addEventListener('click', () => {
@@ -716,7 +795,6 @@ function setupEventListeners() {
             submitBtn.innerHTML = originalBtnText;
         }
     });
-
     // Quiz restart button listener
     btnQuizRestart.addEventListener('click', () => {
         initQuizState();
@@ -751,6 +829,233 @@ function setupEventListeners() {
             renderMediaShowcase(false);
         });
     }
+    // Switch to Card Generator
+    if (navCardGenerator) {
+        navCardGenerator.addEventListener('click', () => {
+            updateHeaderNavState(navCardGenerator);
+            
+            // Pause music if it's currently playing inside the Membership section
+            const audio = document.getElementById('ambient-audio');
+            const playBtn = document.getElementById('btn-player-play');
+            const vinyl = document.getElementById('vinyl-disc');
+            const playerWidget = document.getElementById('music-player');
+            
+            if (audio && !audio.paused) {
+                wasMusicPlayingBeforeSwitch = true;
+                audio.pause();
+                if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                if (vinyl) vinyl.classList.remove('playing');
+            } else {
+                wasMusicPlayingBeforeSwitch = false;
+            }
+            
+            // Hide music player widget on Card Generator page
+            if (playerWidget) {
+                playerWidget.style.display = 'none';
+            }
+            
+            switchView(viewCardGenerator);
+        });
+    }
+
+    // Tab buttons control panel (Bottom-Drawer Studio navigation)
+    const toolbarTabBtns = document.querySelectorAll('.toolbar-tab-btn');
+    toolbarTabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            toolbarTabBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            const targetTab = e.currentTarget.dataset.tab;
+            
+            document.querySelectorAll('.card-panel-content').forEach(p => p.classList.remove('active'));
+            const targetPanel = document.getElementById(`panel-${targetTab}`);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+
+    // Custom text value keyup
+    if (memberNicknameInput) {
+        memberNicknameInput.addEventListener('input', () => {
+            cardValName.textContent = memberNicknameInput.value.trim() || '';
+        });
+    }
+
+    if (memberDateInput) {
+        memberDateInput.addEventListener('input', () => {
+            cardValDate.textContent = memberDateInput.value || '';
+        });
+    }
+
+    // Bias Member Selector radios
+    const biasChoices = document.querySelectorAll('input[name="bias-choice"]');
+    biasChoices.forEach(radio => {
+        radio.addEventListener('change', updateCardBiasSignature);
+    });
+
+    // Ink choice radios
+    const inkChoices = document.querySelectorAll('input[name="ink-choice"]');
+    inkChoices.forEach(radio => {
+        radio.addEventListener('change', () => {
+            cardBiasSignature.className = 'ink-' + radio.value;
+        });
+    });
+
+    // Card Shapes toggle
+    const shapeBtns = document.querySelectorAll('.btn-shape-toggle');
+    shapeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            shapeBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            activeCardShape = e.currentTarget.dataset.shape;
+            
+            membershipCard.classList.remove('shape-rectangle', 'shape-square', 'shape-venom');
+            membershipCard.classList.add('shape-' + activeCardShape);
+        });
+    });
+
+    // Card Frame toggle
+    const frameBtns = document.querySelectorAll('.btn-frame-toggle');
+    frameBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            frameBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            activeHolderFrame = e.currentTarget.dataset.frame;
+            
+            membershipCard.classList.remove('frame-bunny', 'frame-kitty', 'frame-cloud');
+            if (activeHolderFrame !== 'none') {
+                membershipCard.classList.add('frame-' + activeHolderFrame);
+            }
+        });
+    });
+
+    // Finishes toggle
+    const finishBtns = document.querySelectorAll('.btn-finish-toggle');
+    finishBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            finishBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            activeCardFinish = e.currentTarget.dataset.finish;
+            
+            membershipCard.classList.remove('finish-matte', 'finish-glossy', 'finish-glitter', 'finish-holo');
+            membershipCard.classList.add('finish-' + activeCardFinish);
+        });
+    });
+
+    // Patterns toggle
+    const patternBtns = document.querySelectorAll('.btn-pattern-toggle');
+    patternBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            patternBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            activeCardPattern = e.currentTarget.dataset.pattern;
+            
+            membershipCard.classList.remove('pattern-solid', 'pattern-plaid', 'pattern-dots', 'pattern-checker', 'pattern-hearts', 'pattern-ruled');
+            membershipCard.classList.add('pattern-' + activeCardPattern);
+        });
+    });
+
+    // Colors Pickers
+    if (colorBgPicker) {
+        colorBgPicker.addEventListener('input', () => {
+            membershipCard.style.backgroundColor = colorBgPicker.value;
+        });
+    }
+    if (colorBorderPicker) {
+        colorBorderPicker.addEventListener('input', () => {
+            membershipCard.style.borderColor = colorBorderPicker.value;
+        });
+    }
+    if (colorLinesPicker) {
+        colorLinesPicker.addEventListener('input', () => {
+            // Update neon labels, colons, highlights, custom tags, and barcodes
+            document.querySelectorAll('.card-bp-logo, .card-blink-sub, .card-label, .card-colon, .card-tagline .font-handwritten').forEach(el => {
+                el.style.color = colorLinesPicker.value;
+            });
+            document.querySelectorAll('.card-underline, .card-barcode-badge').forEach(el => {
+                el.style.backgroundColor = colorLinesPicker.value;
+            });
+            // Update SVG lines neon pink stroke attributes
+            document.querySelectorAll('.neon-svg path, .neon-svg line, .neon-svg rect, .neon-svg circle').forEach(el => {
+                el.setAttribute('stroke', colorLinesPicker.value);
+                if (el.tagName.toLowerCase() !== 'path' && el.tagName.toLowerCase() !== 'line') {
+                    el.setAttribute('fill', colorLinesPicker.value);
+                }
+            });
+        });
+    }
+    if (colorTextPicker) {
+        colorTextPicker.addEventListener('input', () => {
+            membershipCard.style.color = colorTextPicker.value;
+            // Kept values, fan-club subheader, and taglines crisp white as in official K-pop design
+        });
+    }
+
+    // Font family selection
+    const fontBtns = document.querySelectorAll('.btn-font-toggle');
+    fontBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            fontBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            activeCardFont = e.currentTarget.dataset.font;
+            
+            membershipCard.classList.remove('font-sans', 'font-serif', 'font-handwritten');
+            membershipCard.classList.add('font-' + activeCardFont);
+        });
+    });
+
+    // Sticker category switch
+    const trayCatBtns = document.querySelectorAll('.btn-tray-cat');
+    trayCatBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            trayCatBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            renderStickerTray(e.currentTarget.dataset.cat);
+        });
+    });
+
+    // Custom file upload sticker button
+    if (btnUploadCustomSticker) {
+        btnUploadCustomSticker.addEventListener('click', () => {
+            customStickerInput.click();
+        });
+    }
+    if (customStickerInput) {
+        customStickerInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    SYSTEM_STICKERS.myphotos.unshift(event.target.result);
+                    renderStickerTray('myphotos');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Card Actions
+    if (btnDownloadCard) {
+        btnDownloadCard.addEventListener('click', downloadCardImage);
+    }
+    if (btnShareCard) {
+        btnShareCard.addEventListener('click', shareCardImage);
+    }
+
+    // 3D Parallax Tilt listeners disabled for static flat aesthetic
+    /*
+    if (cardCanvasWrapper) {
+        cardCanvasWrapper.addEventListener('mousemove', handleCardParallaxTilt);
+        cardCanvasWrapper.addEventListener('mouseleave', resetCardParallaxTilt);
+    }
+    */
+
+    // Placed stickers dragging window-level event handlers
+    window.addEventListener('mousemove', handleStickerInteractionMove);
+    window.addEventListener('touchmove', handleStickerInteractionMove, { passive: false });
+    window.addEventListener('mouseup', endStickerInteraction);
+    window.addEventListener('touchend', endStickerInteraction);
+
 }
 
 // ==========================================================================
@@ -1029,6 +1334,8 @@ function openShareXModal(type = 'letter') {
     });
 }
 
+
+
 // Save letter helper
 async function saveLetter(letter) {
     // Add to active local cache memory immediately for instant update
@@ -1226,6 +1533,7 @@ async function renderPolaroidGallery(forceFetch = false) {
         polaroidCard.className = `polaroid skin-${config.skin}`;
         
         // Random slight rotation to create realistic physical layout
+        // Generating deterministic seed rotation based on ID to avoid fluttering on redraw
         const rotationAngle = getRotationForId(letter.id);
         polaroidCard.style.transform = `rotate(${rotationAngle}deg)`;
 
@@ -1602,6 +1910,7 @@ async function renderMediaShowcase(forceFetch = false) {
 
         const isAuthorMe = currentUser.sender && item.author.toLowerCase() === currentUser.sender.toLowerCase();
         const isAdmin = localStorage.getItem('capsule_simulated_bypass') === 'true';
+        // Check if it is a custom database item (numeric string ids or uuid) vs seed item (seed-media-X)
         const isSeedItem = item.id.startsWith('seed-media-');
         const showDeleteBtn = (isAuthorMe || isAdmin) && !isSeedItem; 
         
@@ -1668,11 +1977,13 @@ function showCustomConfirm(message, confirmText = "Delete") {
 }
 
 async function deleteMediaItem(id) {
+    // 1. Instantly remove from local cached memory and re-render grid
     if (loadedMedia) {
         loadedMedia = loadedMedia.filter(item => item.id !== id);
     }
-    renderMediaShowcase(false);
+    renderMediaShowcase(false); // fast re-render!
     
+    // 2. Perform background delete query to database
     try {
         const { error } = await _supabase
             .from('media')
@@ -1683,6 +1994,7 @@ async function deleteMediaItem(id) {
         console.error('Failed to delete from database:', e);
     }
 
+    // 3. Sync local fallback copy in parallel
     let mediaList = JSON.parse(localStorage.getItem('polaroid_capsule_media')) || [];
     mediaList = mediaList.filter(item => item.id !== id);
     localStorage.setItem('polaroid_capsule_media', JSON.stringify(mediaList));
@@ -1691,11 +2003,13 @@ async function deleteMediaItem(id) {
 }
 
 async function deleteLetterItem(id) {
+    // 1. Instantly remove from local cached memory and re-render grid
     if (loadedLetters) {
         loadedLetters = loadedLetters.filter(item => item.id !== id);
     }
-    renderPolaroidGallery(false);
+    renderPolaroidGallery(false); // fast re-render!
     
+    // 2. Perform background delete query to database
     try {
         const { error } = await _supabase
             .from('letters')
@@ -1706,6 +2020,7 @@ async function deleteLetterItem(id) {
         console.error('Failed to delete letter from database:', e);
     }
 
+    // 3. Sync local fallback copy in parallel
     let lettersList = JSON.parse(localStorage.getItem('polaroid_capsule_letters')) || [];
     lettersList = lettersList.filter(item => item.id !== id);
     localStorage.setItem('polaroid_capsule_letters', JSON.stringify(lettersList));
@@ -1713,6 +2028,10 @@ async function deleteLetterItem(id) {
     showToast('Letter deleted successfully.');
     closeModal();
 }
+
+// ==========================================================================
+// BLACKPINK 10th Anniversary specialized helper logic
+// ==========================================================================
 
 // Safe JSON parser for sticker column
 function parseStickerConfig(stickerStr) {
@@ -1785,15 +2104,17 @@ function initAudioPlayer() {
         trackTitle.textContent = playlist[index].title;
     }
 
+    // Autoplay fallback on first click/keypress/touch anywhere on the screen (only if not on Media Hub)
     function autoplayOnInteraction() {
         const isMediaHubActive = viewMediaHub.classList.contains('active');
-        if (isMediaHubActive) return;
+        if (isMediaHubActive) return; // Wait until they switch to Capsule
         
         if (audio.paused) {
-            audio.play().then(() => {
+            (audio.play() || Promise.resolve()).then(() => {
                 playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 vinyl.classList.add('playing');
                 if (photoRollTrack) photoRollTrack.classList.add('playing');
+                // Played successfully, remove interaction listeners
                 document.removeEventListener('click', autoplayOnInteraction);
                 document.removeEventListener('keydown', autoplayOnInteraction);
                 document.removeEventListener('touchend', autoplayOnInteraction);
@@ -1815,7 +2136,7 @@ function initAudioPlayer() {
 
     playBtn.addEventListener('click', () => {
         if (audio.paused) {
-            audio.play().then(() => {
+            (audio.play() || Promise.resolve()).then(() => {
                 playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 vinyl.classList.add('playing');
                 if (photoRollTrack) photoRollTrack.classList.add('playing');
@@ -1835,7 +2156,7 @@ function initAudioPlayer() {
         let newIndex = currentTrackIndex - 1;
         if (newIndex < 0) newIndex = playlist.length - 1;
         loadTrack(newIndex);
-        audio.play().then(() => {
+        (audio.play() || Promise.resolve()).then(() => {
             playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
             vinyl.classList.add('playing');
             if (photoRollTrack) photoRollTrack.classList.add('playing');
@@ -1846,17 +2167,19 @@ function initAudioPlayer() {
         let newIndex = currentTrackIndex + 1;
         if (newIndex >= playlist.length) newIndex = 0;
         loadTrack(newIndex);
-        audio.play().then(() => {
+        (audio.play() || Promise.resolve()).then(() => {
             playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
             vinyl.classList.add('playing');
             if (photoRollTrack) photoRollTrack.classList.add('playing');
         });
     });
 
-    audio.play().then(() => {
+    // Attempt to autoplay immediately on load (will work if browser MEI or settings allow it)
+    (audio.play() || Promise.resolve()).then(() => {
         playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
         vinyl.classList.add('playing');
         if (photoRollTrack) photoRollTrack.classList.add('playing');
+        // Successfully played on load, remove interaction triggers
         document.removeEventListener('click', autoplayOnInteraction);
         document.removeEventListener('keydown', autoplayOnInteraction);
         document.removeEventListener('touchend', autoplayOnInteraction);
@@ -1901,6 +2224,7 @@ function updateLettersProgress(count) {
     if (cdCountText) cdCountText.textContent = `${count.toLocaleString()} / ${target.toLocaleString()}`;
 }
 
+
 // ==========================================================================
 // PWA INSTALL LOGIC & SERVICE WORKER REGISTRATION
 // ==========================================================================
@@ -1917,6 +2241,7 @@ if ('serviceWorker' in navigator) {
             });
     });
 
+    // Reload page when service worker updates and takes control
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
@@ -1928,8 +2253,11 @@ if ('serviceWorker' in navigator) {
 
 // Listen for the beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent standard browser install prompt banner
     e.preventDefault();
+    // Cache the event prompt
     deferredPrompt = e;
+    // Show the Install Button in the header
     if (btnInstallApp) {
         btnInstallApp.classList.remove('hidden');
     }
@@ -1943,6 +2271,660 @@ window.addEventListener('appinstalled', (evt) => {
     }
     showToast("Dear BLACKPINK installed on your home screen! 🖤💗");
 });
+
+
+// ==========================================================================
+// BLINK CARD MEMBERSHIP GENERATOR HELPER METHODS
+// ==========================================================================
+
+function updateCardBiasSignature() {
+    const selectedBiasEl = document.querySelector('input[name="bias-choice"]:checked');
+    const bias = selectedBiasEl ? selectedBiasEl.value : '';
+    
+    // 1. Update text label on card
+    const biasNames = {
+        jisoo: 'JISOO ♡',
+        jennie: 'JENNIE ♡',
+        rose: 'ROSÉ ♡',
+        lisa: 'LISA ♡'
+    };
+    const valBias = document.getElementById('card-val-bias');
+    if (valBias) {
+        valBias.textContent = bias ? biasNames[bias] : '';
+    }
+    
+    // 2. Update signature image source
+    if (cardBiasSignature) {
+        if (!bias) {
+            cardBiasSignature.classList.add('hidden');
+            cardBiasSignature.src = '';
+        } else {
+            cardBiasSignature.onerror = () => {
+                cardBiasSignature.classList.add('hidden');
+            };
+            cardBiasSignature.onload = () => {
+                cardBiasSignature.classList.remove('hidden');
+            };
+            cardBiasSignature.src = BIAS_SIGNATURES[bias];
+        }
+    }
+}
+
+function renderStickerTray(category) {
+    if (!stickersTrayGrid) return;
+    
+    stickersTrayGrid.innerHTML = '';
+    const stickers = SYSTEM_STICKERS[category] || [];
+    
+    if (stickers.length === 0) {
+        stickersTrayGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; font-size: 0.8rem; color: var(--color-text-muted); padding: 20px;">No stickers yet.</div>';
+        return;
+    }
+    
+    stickers.forEach(src => {
+        const item = document.createElement('div');
+        item.className = 'tray-sticker-item';
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.onerror = () => {
+            // Draw placeholder emoji
+            item.innerHTML = '✨';
+        };
+        
+        item.appendChild(img);
+        item.addEventListener('click', () => {
+            addStickerToCard(src);
+        });
+        stickersTrayGrid.appendChild(item);
+    });
+}
+
+function addStickerToCard(src) {
+    const id = 'placed-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    const stickerObj = {
+        id: id,
+        src: src,
+        x: 180, // starting position center
+        y: 110,
+        scale: 1.0,
+        rotation: 0,
+        flipped: false
+    };
+    
+    cardPlacedStickers.push(stickerObj);
+    drawStickerOnCanvas(stickerObj);
+    selectSticker(id);
+}
+
+function drawStickerOnCanvas(stickerObj) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'draggable-sticker-wrapper sticker-feel';
+    wrapper.id = stickerObj.id;
+    wrapper.style.width = '70px';
+    wrapper.style.height = '70px';
+    
+    const img = document.createElement('img');
+    img.src = stickerObj.src;
+    img.onerror = () => {
+        img.style.display = 'none';
+        const placeholder = document.createElement('span');
+        placeholder.textContent = '✨';
+        placeholder.style.fontSize = '2rem';
+        wrapper.appendChild(placeholder);
+    };
+    wrapper.appendChild(img);
+    
+    // Add interactive click handles
+    wrapper.innerHTML += `
+        <div class="sticker-handle handle-rotate"><i class="fa-solid fa-arrows-spin"></i></div>
+        <div class="sticker-handle handle-scale"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+        <div class="sticker-handle btn-del-sticker"><i class="fa-solid fa-xmark"></i></div>
+        <div class="sticker-handle btn-flip-sticker"><i class="fa-solid fa-arrows-left-right"></i></div>
+    `;
+    
+    // Position the wrapper element
+    updateStickerElementTransform(wrapper, stickerObj);
+    
+    // Mousedown listener to drag or select
+    wrapper.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('sticker-handle')) return;
+        handleStickerInteractionStart(e, 'drag', stickerObj.id);
+    });
+    wrapper.addEventListener('touchstart', (e) => {
+        if (e.target.classList.contains('sticker-handle')) return;
+        handleStickerInteractionStart(e, 'drag', stickerObj.id);
+    }, { passive: false });
+    
+    // Wire handles listeners
+    const rotBtn = wrapper.querySelector('.handle-rotate');
+    const scaleBtn = wrapper.querySelector('.handle-scale');
+    const delBtn = wrapper.querySelector('.btn-del-sticker');
+    const flipBtn = wrapper.querySelector('.btn-flip-sticker');
+    
+    rotBtn.addEventListener('mousedown', (e) => {
+        handleStickerInteractionStart(e, 'rotate', stickerObj.id);
+    });
+    rotBtn.addEventListener('touchstart', (e) => {
+        handleStickerInteractionStart(e, 'rotate', stickerObj.id);
+    }, { passive: false });
+    
+    scaleBtn.addEventListener('mousedown', (e) => {
+        handleStickerInteractionStart(e, 'scale', stickerObj.id);
+    });
+    scaleBtn.addEventListener('touchstart', (e) => {
+        handleStickerInteractionStart(e, 'scale', stickerObj.id);
+    }, { passive: false });
+    
+    delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSticker(stickerObj.id);
+    });
+    delBtn.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        deleteSticker(stickerObj.id);
+    });
+    
+    flipBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        flipSticker(stickerObj.id);
+    });
+    flipBtn.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        flipSticker(stickerObj.id);
+    });
+    
+    cardStickerCanvas.appendChild(wrapper);
+}
+
+function updateStickerElementTransform(el, stickerObj) {
+    el.style.left = stickerObj.x + 'px';
+    el.style.top = stickerObj.y + 'px';
+    const flipScale = stickerObj.flipped ? -1 : 1;
+    el.style.transform = `rotate(${stickerObj.rotation}deg) scale(${stickerObj.scale * flipScale}, ${stickerObj.scale})`;
+}
+
+function selectSticker(id) {
+    selectedStickerId = id;
+    document.querySelectorAll('.draggable-sticker-wrapper').forEach(w => {
+        if (w.id === id) {
+            w.classList.add('active');
+        } else {
+            w.classList.remove('active');
+        }
+    });
+}
+
+function deleteSticker(id) {
+    cardPlacedStickers = cardPlacedStickers.filter(s => s.id !== id);
+    const wrapper = document.getElementById(id);
+    if (wrapper) wrapper.remove();
+    if (selectedStickerId === id) selectedStickerId = null;
+}
+
+function flipSticker(id) {
+    const sticker = cardPlacedStickers.find(s => s.id === id);
+    if (sticker) {
+        sticker.flipped = !sticker.flipped;
+        const wrapper = document.getElementById(id);
+        if (wrapper) updateStickerElementTransform(wrapper, sticker);
+    }
+}
+
+function handleStickerInteractionStart(e, action, id) {
+    e.preventDefault();
+    selectSticker(id);
+    activeStickerAction = action;
+    activeStickerEl = document.getElementById(id);
+    
+    const sticker = cardPlacedStickers.find(s => s.id === id);
+    if (!sticker) return;
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    dragStartX = clientX;
+    dragStartY = clientY;
+    stickerStartLeft = sticker.x;
+    stickerStartTop = sticker.y;
+    stickerStartWidth = activeStickerEl.offsetWidth;
+    stickerStartHeight = activeStickerEl.offsetHeight;
+    stickerStartRotation = sticker.rotation;
+    
+    // For rotate/scale, compute relative angle and distance from the center of the sticker
+    const rect = activeStickerEl.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+    stickerCenterPointerDist = Math.sqrt(dx * dx + dy * dy);
+    stickerCenterPointerAngle = Math.atan2(dy, dx);
+}
+
+function handleStickerInteractionMove(e) {
+    if (!activeStickerAction || !activeStickerEl) return;
+    
+    const sticker = cardPlacedStickers.find(s => s.id === selectedStickerId);
+    if (!sticker) return;
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    if (activeStickerAction === 'drag') {
+        const dx = clientX - dragStartX;
+        const dy = clientY - dragStartY;
+        sticker.x = stickerStartLeft + dx;
+        sticker.y = stickerStartTop + dy;
+    } else if (activeStickerAction === 'rotate' || activeStickerAction === 'scale') {
+        const rect = activeStickerEl.getBoundingClientRect();
+        
+        // Find absolute center relative to viewport
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const dx = clientX - centerX;
+        const dy = clientY - centerY;
+        
+        if (activeStickerAction === 'rotate') {
+            const currentAngle = Math.atan2(dy, dx);
+            const angleDiff = currentAngle - stickerCenterPointerAngle;
+            sticker.rotation = stickerStartRotation + (angleDiff * 180 / Math.PI);
+        } else if (activeStickerAction === 'scale') {
+            const currentDist = Math.sqrt(dx * dx + dy * dy);
+            const scaleFactor = currentDist / stickerCenterPointerDist;
+            sticker.scale = Math.max(0.3, Math.min(3.0, scaleFactor));
+        }
+    }
+    
+    updateStickerElementTransform(activeStickerEl, sticker);
+}
+
+function endStickerInteraction() {
+    activeStickerAction = null;
+    activeStickerEl = null;
+}
+
+// 3D Parallax Tilt Card implementation
+function handleCardParallaxTilt(e) {
+    const card = membershipCard;
+    const glare = document.getElementById('card-holo-glare');
+    if (!card) return;
+    
+    const rect = cardCanvasWrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const tiltX = (centerY - y) / 10; // max 10 degrees tilt
+    const tiltY = (x - centerX) / 10;
+    
+    card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
+    
+    if (glare && (activeCardFinish === 'glossy' || activeCardFinish === 'holo')) {
+        const px = (x / rect.width) * 100;
+        const py = (y / rect.height) * 100;
+        glare.style.backgroundPosition = `${px}% ${py}%`;
+    }
+}
+
+function resetCardParallaxTilt() {
+    const card = membershipCard;
+    if (card) {
+        card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+    }
+}
+
+// Canvas Compilation Drawer methods (Matching horizontal landscape exactly)
+function compileCardCanvas() {
+    return new Promise((resolve) => {
+        // High resolution sizing matching landscape ratio
+        let width = 960;
+        let height = 600;
+        if (activeCardShape === 'square') {
+            width = 760;
+            height = 760;
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Define theme colors
+        const bgColor = colorBgPicker.value;
+        const borderColor = colorBorderPicker.value;
+        const linesColor = colorLinesPicker.value;
+        const textColor = colorTextPicker.value;
+        
+        // 1. Clip shapes (Venom shape horizontal or Rounded Rect)
+        ctx.save();
+        if (activeCardShape === 'venom') {
+            ctx.beginPath();
+            ctx.moveTo(width * 0.1, 0);
+            ctx.lineTo(width * 0.9, 0);
+            ctx.lineTo(width, height * 0.15);
+            ctx.lineTo(width, height * 0.85);
+            ctx.lineTo(width * 0.9, height);
+            ctx.lineTo(width * 0.1, height);
+            ctx.lineTo(0, height * 0.85);
+            ctx.lineTo(0, height * 0.15);
+            ctx.closePath();
+            ctx.clip();
+        } else {
+            // Draw rounded rectangle clip
+            const radius = 38;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(width - radius, 0);
+            ctx.quadraticCurveTo(width, 0, width, radius);
+            ctx.lineTo(width, height - radius);
+            ctx.quadraticCurveTo(width, height, width - radius, height);
+            ctx.lineTo(radius, height);
+            ctx.quadraticCurveTo(0, height, 0, height - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.clip();
+        }
+        
+        // 2. Draw background color
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, width, height);
+        
+        // 3. Draw Background Patterns
+        if (activeCardPattern === 'plaid') {
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+            ctx.lineWidth = 4;
+            const step = 40;
+            for (let i = 0; i < width; i += step) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
+            }
+            for (let j = 0; j < height; j += step) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke();
+            }
+        } else if (activeCardPattern === 'dots') {
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            const radius = 4;
+            const step = 32;
+            for (let i = 16; i < width; i += step) {
+                for (let j = 16; j < height; j += step) {
+                    ctx.beginPath();
+                    ctx.arc(i, j, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        } else if (activeCardPattern === 'checker') {
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            const size = 60;
+            for (let i = 0; i < width; i += size * 2) {
+                for (let j = 0; j < height; j += size * 2) {
+                    ctx.fillRect(i, j, size, size);
+                    ctx.fillRect(i + size, j + size, size, size);
+                }
+            }
+        } else if (activeCardPattern === 'hearts') {
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.font = '24px Arial';
+            const step = 60;
+            for (let i = 20; i < width; i += step) {
+                for (let j = 30; j < height; j += step) {
+                    ctx.fillText('❤', i, j);
+                }
+            }
+        } else if (activeCardPattern === 'ruled') {
+            ctx.strokeStyle = 'rgba(255, 117, 144, 0.12)';
+            ctx.lineWidth = 2.5;
+            const step = 28 * (width / 480);
+            for (let j = step; j < height; j += step) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke();
+            }
+        }
+        ctx.restore(); // Restore from clipping mask so stickers and frames can draw outside borders!
+        
+        // 4. Draw outer border frame
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 14;
+        ctx.strokeRect(0, 0, width, height);
+        
+        // Determine font style
+        let fontName = 'sans-serif';
+        if (activeCardFont === 'serif') fontName = 'Playfair Display, Georgia, serif';
+        if (activeCardFont === 'handwritten') fontName = 'Caveat, cursive';
+        
+        // 5. Center-aligned details rows (NAME, JOIN DATE, BIAS)
+        ctx.textAlign = 'left';
+        
+        // Centering coordinates
+        const labelX = width / 2 - 180;
+        const colonX = width / 2 - 50;
+        const valX = width / 2 - 30;
+        const startY = height / 2 - 72;
+        const rowGap = 72;
+        
+        function drawInfoRow(label, value, y) {
+            // Label in pink
+            ctx.fillStyle = linesColor;
+            ctx.font = `bold 18px sans-serif`;
+            ctx.fillText(label, labelX, y);
+            
+            // Colon in pink
+            ctx.fillText(':', colonX, y);
+            
+            // Value in white
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold 22px ${fontName}`;
+            ctx.fillText(value, valX, y);
+            
+            // Underline under value
+            ctx.strokeStyle = linesColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(valX, y + 8);
+            ctx.lineTo(valX + 320, y + 8);
+            ctx.stroke();
+        }
+        
+        const nameVal = cardValName.textContent;
+        const dateVal = cardValDate.textContent;
+        
+        // Parse Bias member name
+        const selectedBiasEl = document.querySelector('input[name="bias-choice"]:checked');
+        const bias = selectedBiasEl ? selectedBiasEl.value : 'jisoo';
+        const biasNames = {
+            jisoo: 'JISOO ♡',
+            jennie: 'JENNIE ♡',
+            rose: 'ROSÉ ♡',
+            lisa: 'LISA ♡'
+        };
+        const biasVal = biasNames[bias];
+        
+        drawInfoRow('NAME', nameVal, startY);
+        drawInfoRow('JOIN DATE', dateVal, startY + rowGap);
+        drawInfoRow('BIAS', biasVal, startY + rowGap * 2);
+        
+        // 6. Draw Bias Signature image (bottom right)
+        const sigImg = new Image();
+        sigImg.src = cardBiasSignature.src;
+        sigImg.onload = () => {
+            ctx.save();
+            const sigX = width - 180;
+            const sigY = height - 90;
+            const sigW = 140;
+            const sigH = 65;
+            
+            // Draw signature offscreen to apply ink color tint
+            const offScreenCanvas = document.createElement('canvas');
+            offScreenCanvas.width = sigW;
+            offScreenCanvas.height = sigH;
+            const oCtx = offScreenCanvas.getContext('2d');
+            oCtx.drawImage(sigImg, 0, 0, sigW, sigH);
+            
+            const ink = document.querySelector('input[name="ink-choice"]:checked').value;
+            let filterColor = '#111111';
+            if (ink === 'gold') filterColor = '#d5a350';
+            if (ink === 'pink') filterColor = '#FF7590';
+            
+            oCtx.globalCompositeOperation = 'source-in';
+            oCtx.fillStyle = filterColor;
+            oCtx.fillRect(0, 0, sigW, sigH);
+            
+            ctx.drawImage(offScreenCanvas, sigX, sigY);
+            ctx.restore();
+            
+            drawStickersAndFrame();
+        };
+        
+        sigImg.onerror = () => {
+            // Draw cursive signature text fallback if loaded
+            if (cardBiasSignature.src && !cardBiasSignature.classList.contains('hidden')) {
+                ctx.fillStyle = linesColor;
+                ctx.font = `italic 22px ${fontName}`;
+                ctx.fillText('Signature', width - 140, height - 60);
+            }
+            drawStickersAndFrame();
+        };
+        
+        function drawStickersAndFrame() {
+            // 7. Placed Stickers rendering
+            let stickerCount = cardPlacedStickers.length;
+            if (stickerCount === 0) {
+                finishCanvasOverlays();
+                return;
+            }
+            
+            let index = 0;
+            function drawNextSticker() {
+                if (index >= stickerCount) {
+                    finishCanvasOverlays();
+                    return;
+                }
+                const sticker = cardPlacedStickers[index];
+                const stickerImg = new Image();
+                stickerImg.src = sticker.src;
+                
+                stickerImg.onload = () => {
+                    ctx.save();
+                    
+                    // Card width represents 480px in editor
+                    const scaleFactor = width / 480;
+                    
+                    // stX, stY coordinates center points
+                    const stX = (sticker.x + 35) * scaleFactor;
+                    const stY = (sticker.y + 35) * scaleFactor;
+                    
+                    ctx.translate(stX, stY);
+                    ctx.rotate(sticker.rotation * Math.PI / 180);
+                    
+                    const flipScale = sticker.flipped ? -1 : 1;
+                    ctx.scale(sticker.scale * flipScale, sticker.scale);
+                    
+                    const stSize = 70 * scaleFactor;
+                    ctx.drawImage(stickerImg, -stSize/2, -stSize/2, stSize, stSize);
+                    
+                    ctx.restore();
+                    index++;
+                    drawNextSticker();
+                };
+                
+                stickerImg.onerror = () => {
+                    index++;
+                    drawNextSticker();
+                };
+            }
+            
+            drawNextSticker();
+        }
+        
+        function finishCanvasOverlays() {
+            // 8. Draw Card Holder Frames
+            if (activeHolderFrame === 'bunny') {
+                ctx.save();
+                ctx.fillStyle = '#FFFFFF';
+                ctx.strokeStyle = bgColor;
+                ctx.lineWidth = 14;
+                
+                // Draw left ear
+                ctx.beginPath();
+                ctx.ellipse(width * 0.28, 40, 28, 60, -Math.PI/12, 0, Math.PI*2);
+                ctx.fill(); ctx.stroke();
+                
+                // Draw right ear
+                ctx.beginPath();
+                ctx.ellipse(width * 0.72, 40, 28, 60, Math.PI/12, 0, Math.PI*2);
+                ctx.fill(); ctx.stroke();
+                ctx.restore();
+            } else if (activeHolderFrame === 'kitty') {
+                // Hanger chains
+                ctx.fillStyle = '#CCCCCC';
+                ctx.beginPath();
+                ctx.arc(width*0.2, 20, 10, 0, Math.PI*2);
+                ctx.arc(width*0.8, 20, 10, 0, Math.PI*2);
+                ctx.fill();
+            }
+            
+            resolve(canvas);
+        }
+    });
+}
+function downloadCardImage() {
+    showToast('Compiling your Membership Card...');
+    compileCardCanvas().then(canvas => {
+        try {
+            const link = document.createElement('a');
+            link.download = `BLINK_Membership_${cardValId.textContent}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('Card saved to your device!');
+        } catch (e) {
+            console.error('Download failed:', e);
+            showToast('Could not auto-download. Try long-pressing/sharing instead!');
+        }
+    });
+}
+
+function shareCardImage() {
+    showToast('Compiling card for sharing...');
+    compileCardCanvas().then(canvas => {
+        canvas.toBlob(blob => {
+            if (!blob) {
+                showToast('Compiling failed.');
+                return;
+            }
+            
+            const file = new File([blob], `BLINK_Membership_${cardValId.textContent}.png`, { type: 'image/png' });
+            
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                    title: 'My BLINK Membership Card',
+                    text: `Check out my official 10-Year BLINK Fan Club Card! 🖤💗 ID: ${cardValId.textContent}`,
+                    files: [file]
+                }).catch(err => {
+                    console.log('Share canceled or failed:', err);
+                });
+            } else {
+                // Fallback copy message + download file
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(`Create your 10-Year BLINK Membership Card at https://dearblackpink.vercel.app 🖤💗`)
+                        .then(() => showToast('Share link copied! Auto-downloading card...'))
+                        .catch(() => showToast('Auto-downloading card...'));
+                } else {
+                    showToast('Auto-downloading card...');
+                }
+                
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.download = `BLINK_Membership_${cardValId.textContent}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }, 1000);
+            }
+        }, 'image/png');
+    });
+}
+
 // ==========================================================================
 // VIP BACKSTAGE PASS GENERATOR ENGINE
 // ==========================================================================
@@ -1952,6 +2934,8 @@ let selectedPhotoSrc = 'bp_pic1.jpg';
 let customPhotoDataUrl = null;
 let selectedPassBg = '#121212';
 let selectedPassFinish = 'glossy';
+
+
 
 function updatePassLabels() {
     const valBias = document.getElementById('pass-val-bias');
@@ -2046,6 +3030,8 @@ function updatePassTheme(bias) {
 }
 
 function initPassListeners() {
+
+
     // Pass finish selector listener
     const finishBtns = document.querySelectorAll('.btn-finish-pass');
     finishBtns.forEach(btn => {
@@ -2073,6 +3059,8 @@ function initPassListeners() {
             updatePassLabels();
         });
     });
+
+
 
     // Name text sync
     const nameInput = document.getElementById('pass-input-name');
@@ -2489,3 +3477,5 @@ function downloadPassAsPNG() {
     link.href = canvas.toDataURL('image/png');
     link.click();
 }
+
+
