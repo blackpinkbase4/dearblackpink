@@ -369,21 +369,46 @@
                         </div>
                     </div>
 
-                    <!-- File Dropzone -->
-                    <div class="form-group">
-                        <label>Upload Photo or Video</label>
+                    <!-- Creation Type Selection -->
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>Creation Type</label>
+                        <div style="display: flex; gap: 16px;">
+                            <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: var(--color-text-main);">
+                                <input type="radio" name="media-type-choice" value="image" checked style="accent-color: var(--color-primary);">
+                                Image / Fanart / Wallpaper
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: var(--color-text-main);">
+                                <input type="radio" name="media-type-choice" value="video" style="accent-color: var(--color-primary);">
+                                Video Edit (YouTube / TikTok Link)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- File Dropzone (Visible when Image selected) -->
+                    <div class="form-group" id="media-upload-file-group">
+                        <label>Upload Photo</label>
                         <div id="media-dropzone" class="media-dropzone">
-                            <input type="file" id="media-file-input" accept="image/*,video/*" required style="display: none;">
+                            <input type="file" id="media-file-input" accept="image/*" required style="display: none;">
                             <div class="dropzone-prompt" id="dropzone-prompt">
-                                <i class="fa-solid fa-photo-film dropzone-icon"></i>
+                                <i class="fa-solid fa-image dropzone-icon"></i>
                                 <p>Click to select or drag & drop</p>
-                                <span class="dropzone-sub">Supports images (JPG, PNG, GIF) and videos (MP4, WebM) up to 50MB</span>
+                                <span class="dropzone-sub">Supports images (JPG, PNG, GIF) up to 10MB</span>
                             </div>
                             <div class="dropzone-preview hidden" id="dropzone-preview">
-                                <!-- Image or Video preview populated dynamically -->
+                                <!-- Image preview populated dynamically -->
                                 <button type="button" class="btn-remove-preview" id="btn-remove-preview"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Video Link Input (Visible when Video selected, hidden by default) -->
+                    <div class="form-group hidden" id="media-video-link-group">
+                        <label for="media-video-url">Video URL</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon"><i class="fa-solid fa-link"></i></span>
+                            <input type="url" id="media-video-url" placeholder="Paste YouTube or TikTok video URL (e.g., https://www.youtube.com/watch?v=...)">
+                        </div>
+                        <span class="dropzone-sub" style="margin-top: 6px; display: block;">Supports YouTube watch/shorts links, TikTok links, and Instagram reels.</span>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -614,7 +639,6 @@
                                 <option value="DEADLINE Era">DEADLINE Era ⏳</option>
                             </select>
                         </div>
-                    </div>
                 </div>
 
                 <!-- Right panel: Interactive Live Preview -->
@@ -691,7 +715,7 @@
                 </div>
             </div>
         </section>
-
+        
     </main>
 
     <!-- Polaroid Zoom Modal Detail -->
@@ -789,7 +813,7 @@
                 <i class="fa-solid fa-cloud-arrow-down"></i>
             </div>
             <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--color-text-main); margin-bottom: 8px;">VIP Pass Saved! 🎉</h3>
-            <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 24px; line-height: 1.5;">Your personalized VIP Concert Pass has been downloaded successfully,Check your Gallery.Share it on your favorite social platforms!</p>
+            <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 24px; line-height: 1.5;">Your personalized VIP Concert Pass has been downloaded successfully. Share it on your favorite social platforms!</p>
             
             <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
                 <a id="btn-share-modal-x" href="#" target="_blank" class="btn btn-secondary" style="background-color: #000000; border-color: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; text-decoration: none;">
