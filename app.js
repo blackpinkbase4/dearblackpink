@@ -158,10 +158,6 @@ const btnRemovePreview = document.getElementById('btn-remove-preview');
 const mediaGrid = document.getElementById('media-grid');
 const mediaEmpty = document.getElementById('media-empty');
 const totalMediaCount = document.getElementById('total-media-count');
-const mediaTypeChoices = document.getElementsByName('media-type-choice');
-const mediaUploadFileGroup = document.getElementById('media-upload-file-group');
-const mediaVideoLinkGroup = document.getElementById('media-video-link-group');
-const mediaVideoUrlInput = document.getElementById('media-video-url');
 
 // PWA Install Elements
 const btnInstallApp = document.getElementById('btn-install-app');
@@ -706,6 +702,11 @@ function setupEventListeners() {
     });
 
     // Toggle Media Hub creation type selection
+    const mediaTypeChoices = document.getElementsByName('media-type-choice');
+    const mediaUploadFileGroup = document.getElementById('media-upload-file-group');
+    const mediaVideoLinkGroup = document.getElementById('media-video-link-group');
+    const mediaVideoUrlInput = document.getElementById('media-video-url');
+
     if (mediaTypeChoices.length > 0) {
         mediaTypeChoices.forEach(radio => {
             radio.addEventListener('change', () => {
@@ -745,7 +746,8 @@ function setupEventListeners() {
             }
             fileType = 'image';
         } else {
-            const videoUrl = mediaVideoUrlInput.value.trim();
+            const videoUrlEl = document.getElementById('media-video-url');
+            const videoUrl = videoUrlEl ? videoUrlEl.value.trim() : '';
             if (!videoUrl) {
                 showToast('Please paste a video URL.');
                 return;
@@ -814,7 +816,8 @@ function setupEventListeners() {
 
             // Reset Form
             mediaCaptionInput.value = '';
-            mediaVideoUrlInput.value = '';
+            const videoUrlElForReset = document.getElementById('media-video-url');
+            if (videoUrlElForReset) videoUrlElForReset.value = '';
             resetUploadPreview();
             showToast('Creation shared successfully!');
             
