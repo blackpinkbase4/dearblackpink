@@ -158,6 +158,10 @@ const btnRemovePreview = document.getElementById('btn-remove-preview');
 const mediaGrid = document.getElementById('media-grid');
 const mediaEmpty = document.getElementById('media-empty');
 const totalMediaCount = document.getElementById('total-media-count');
+const mediaTypeChoices = document.getElementsByName('media-type-choice');
+const mediaUploadFileGroup = document.getElementById('media-upload-file-group');
+const mediaVideoLinkGroup = document.getElementById('media-video-link-group');
+const mediaVideoUrlInput = document.getElementById('media-video-url');
 
 // PWA Install Elements
 const btnInstallApp = document.getElementById('btn-install-app');
@@ -701,6 +705,25 @@ function setupEventListeners() {
         resetUploadPreview();
     });
 
+    // Toggle Media Hub creation type selection
+    if (mediaTypeChoices.length > 0) {
+        mediaTypeChoices.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'image') {
+                    mediaUploadFileGroup.classList.remove('hidden');
+                    mediaVideoLinkGroup.classList.add('hidden');
+                    mediaVideoUrlInput.removeAttribute('required');
+                    mediaFileInput.setAttribute('required', '');
+                } else {
+                    mediaUploadFileGroup.classList.add('hidden');
+                    mediaVideoLinkGroup.classList.remove('hidden');
+                    mediaVideoUrlInput.setAttribute('required', '');
+                    mediaFileInput.removeAttribute('required');
+                }
+            });
+        });
+    }
+
     // Media Form Submission
     mediaUploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -708,50 +731,66 @@ function setupEventListeners() {
         const author = mediaAuthorInput.value.trim();
         const caption = mediaCaptionInput.value.trim();
         
-        if (!uploadedFileData || !uploadedFileType || !selectedFileObject) {
-            showToast('Please select an image or video to share.');
-            return;
+        // Find which creation type is selected
+        const selectedTypeEl = document.querySelector('input[name="media-type-choice"]:checked');
+        const creationType = selectedTypeEl ? selectedTypeEl.value : 'image';
+
+        let fileUrl = '';
+        let fileType = '';
+
+        if (creationType === 'image') {
+            if (!uploadedFileData || !selectedFileObject) {
+                showToast('Please select an image file to share.');
+                return;
+            }
+            fileType = 'image';
+        } else {
+            const videoUrl = mediaVideoUrlInput.value.trim();
+            if (!videoUrl) {
+                showToast('Please paste a video URL.');
+                return;
+            }
+            fileType = 'video';
+            fileUrl = videoUrl;
         }
 
         // Disable button during upload
         const submitBtn = mediaUploadForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Uploading to Cloud... <i class="fa-solid fa-spinner fa-spin"></i>';
+        submitBtn.innerHTML = 'Publishing Creation... <i class="fa-solid fa-spinner fa-spin"></i>';
 
         try {
-            let fileToUpload = selectedFileObject;
-            
-            // Compress if it is an image
-            if (uploadedFileType === 'image') {
+            if (creationType === 'image') {
                 submitBtn.innerHTML = 'Optimizing Image... <i class="fa-solid fa-wand-magic-sparkles"></i>';
+                let fileToUpload = selectedFileObject;
                 try {
                     fileToUpload = await compressImage(selectedFileObject);
                     console.log(`Original image size: ${(selectedFileObject.size / 1024).toFixed(1)}KB, Compressed: ${(fileToUpload.size / 1024).toFixed(1)}KB`);
                 } catch (compressErr) {
                     console.error('Image compression failed, using original:', compressErr);
                 }
+
+                submitBtn.innerHTML = 'Uploading to Cloud... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+                // 1. Upload to Supabase Storage Bucket
+                const fileExt = fileToUpload.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+                const filePath = `uploads/${fileName}`;
+
+                const { data, error: uploadError } = await _supabase.storage
+                    .from('fan-uploads')
+                    .upload(filePath, fileToUpload);
+
+                if (uploadError) throw uploadError;
+
+                // 2. Get Public URL
+                const { data: urlData } = _supabase.storage
+                    .from('fan-uploads')
+                    .getPublicUrl(filePath);
+                
+                fileUrl = urlData.publicUrl;
             }
-
-            submitBtn.innerHTML = 'Uploading to Cloud... <i class="fa-solid fa-spinner fa-spin"></i>';
-
-            // 1. Upload to Supabase Storage Bucket
-            const fileExt = fileToUpload.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-            const filePath = `uploads/${fileName}`;
-
-            const { data, error: uploadError } = await _supabase.storage
-                .from('fan-uploads')
-                .upload(filePath, fileToUpload);
-
-            if (uploadError) throw uploadError;
-
-            // 2. Get Public URL
-            const { data: urlData } = _supabase.storage
-                .from('fan-uploads')
-                .getPublicUrl(filePath);
-            
-            const fileUrl = urlData.publicUrl;
 
             // 3. Save entry to Supabase media database table
             const { error: dbError } = await _supabase
@@ -760,7 +799,7 @@ function setupEventListeners() {
                     author: author,
                     caption: caption,
                     file_url: fileUrl,
-                    file_type: uploadedFileType
+                    file_type: fileType
                 }]);
 
             if (dbError) throw dbError;
@@ -775,6 +814,7 @@ function setupEventListeners() {
 
             // Reset Form
             mediaCaptionInput.value = '';
+            mediaVideoUrlInput.value = '';
             resetUploadPreview();
             showToast('Creation shared successfully!');
             
@@ -789,7 +829,7 @@ function setupEventListeners() {
             }, 1500);
         } catch (error) {
             console.error('Upload failed:', error);
-            showToast('Upload failed! Please check your file size or database connection.');
+            showToast('Upload failed! Please check your connection or database limits.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
@@ -1616,7 +1656,7 @@ function escapeHTML(str) {
 }
 
 // Client-side image compressor before upload
-function compressImage(file, maxWidth = 1600, maxHeight = 1600, quality = 0.8) {
+function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
     return new Promise((resolve) => {
         if (typeof window === 'undefined' || !window.FileReader || !window.HTMLCanvasElement) {
             return resolve(file);
@@ -1841,6 +1881,12 @@ function resetUploadPreview() {
     dropzonePrompt.classList.remove('hidden');
 }
 
+function getYouTubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
 async function renderMediaShowcase(forceFetch = false) {
     let customMedia = [];
     
@@ -1902,10 +1948,31 @@ async function renderMediaShowcase(forceFetch = false) {
         if (item.fileType === 'image') {
             mediaTag = `<img src="${item.fileData}" alt="${escapeHTML(item.caption)}">`;
         } else {
-            mediaTag = `
-                <div class="video-badge"><i class="fa-solid fa-circle-play"></i> Video</div>
-                <video src="${item.fileData}" muted loop playsinline controls></video>
-            `;
+            const ytId = getYouTubeId(item.fileData);
+            if (ytId) {
+                mediaTag = `<iframe src="https://www.youtube.com/embed/${ytId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>`;
+            } else {
+                // For TikTok/Instagram/others, show a beautiful clickable preview card
+                let platform = 'Video';
+                let icon = 'fa-solid fa-play';
+                if (item.fileData.includes('tiktok.com')) {
+                    platform = 'TikTok';
+                    icon = 'fa-brands fa-tiktok';
+                } else if (item.fileData.includes('instagram.com')) {
+                    platform = 'Instagram';
+                    icon = 'fa-brands fa-instagram';
+                }
+                
+                mediaTag = `
+                    <a href="${item.fileData}" target="_blank" rel="noopener noreferrer" class="external-video-link-preview" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#1C1819; color:#FFF0F2; text-decoration:none; gap:12px;">
+                        <div class="video-badge"><i class="fa-solid fa-square-arrow-up-right"></i> External</div>
+                        <div class="platform-icon-circle" style="width:56px; height:56px; border-radius:50%; background:var(--color-primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:white;">
+                            <i class="${icon}"></i>
+                        </div>
+                        <span style="font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Play on ${platform}</span>
+                    </a>
+                `;
+            }
         }
 
         const isAuthorMe = currentUser.sender && item.author.toLowerCase() === currentUser.sender.toLowerCase();
