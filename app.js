@@ -280,6 +280,10 @@ function navigateInitialView() {
 }
 
 function switchView(targetView) {
+    if (isVaultUnlocked() && (targetView === viewGatekeeper || targetView === viewWrite || targetView === viewCountdown)) {
+        targetView = viewGallery;
+    }
+
     if (targetView !== viewMediaHub && targetView !== viewQuiz && targetView !== viewPass) {
         currentCapsuleView = targetView;
     }
@@ -1479,6 +1483,12 @@ function startCountdownTracker() {
 
 // Render Polaroid gallery
 async function renderPolaroidGallery(forceFetch = false) {
+    if (isVaultUnlocked()) {
+        if (galleryWriteNew) galleryWriteNew.classList.add('hidden');
+    } else {
+        if (galleryWriteNew) galleryWriteNew.classList.remove('hidden');
+    }
+
     let customLetters = [];
     
     if (forceFetch || !loadedLetters) {
