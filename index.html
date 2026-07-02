@@ -16,6 +16,34 @@
     <link rel="manifest" href="manifest.json">
 </head>
 <body class="dark-mode">
+    <!-- Temporary Maintenance Overlay (Supabase Limit Reached) -->
+    <div id="maintenance-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0b0b0c; z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; font-family: 'Outfit', sans-serif;">
+        <style>
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 0.9; }
+                50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 25px rgba(244, 63, 94, 0.6)); }
+                100% { transform: scale(1); opacity: 0.9; }
+            }
+            @keyframes flash {
+                0%, 100% { opacity: 0.3; }
+                50% { opacity: 1; }
+            }
+        </style>
+        <div style="max-width: 480px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 40px 32px; border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center;">
+            <div style="font-size: 3.5rem; color: #f43f5e; margin-bottom: 24px; filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.4)); animation: pulse 2s infinite;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #ffffff; margin-bottom: 16px; font-weight: 700;">Under Maintenance</h2>
+            <p style="font-size: 0.95rem; color: #a0a0a5; line-height: 1.6; margin-bottom: 24px;">Dear BLINKs, the site is currently under update. Please check back soon!</p>
+            <p style="font-size: 0.85rem; color: #f43f5e; font-weight: 600; margin-bottom: 32px; letter-spacing: 0.5px;">SORRY FOR THE INCONVENIENCE • PLEASE TRY AGAIN LATER</p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #f43f5e; animation: flash 1.5s infinite 0s;"></span>
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #f43f5e; animation: flash 1.5s infinite 0.3s;"></span>
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #f43f5e; animation: flash 1.5s infinite 0.6s;"></span>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating background elements -->
     <div class="bg-decorations">
         <div class="blob blob-1"></div>
@@ -49,6 +77,9 @@
             </button>
             <button id="nav-pass" class="nav-link">
                 <i class="fa-solid fa-id-card"></i> BLINK VIP Pass 🎫
+            </button>
+            <button id="nav-streams" class="nav-link">
+                <i class="fa-solid fa-music"></i> Streaming Hub
             </button>
         </nav>
 
@@ -715,7 +746,291 @@
                 </div>
             </div>
         </section>
-        
+
+        <!-- VIEW 8: STREAMING GOALS & LEADERBOARD -->
+        <section id="view-streams" class="app-view">
+            <div class="gallery-intro" style="margin-bottom: 30px;">
+                <h1 class="gallery-title">BLINK Streaming Hub</h1>
+                <p class="gallery-subtitle">Stream our target tracks on Spotify/Apple Music and sync your Last.fm scrobbles to claim your spot in the Top 20 BLINK Streamers!</p>
+            </div>
+
+            <div class="streaming-hub-layout">
+                <!-- Left: 7 Song Cards -->
+                <div class="streaming-tracks-panel">
+                    <h3 class="panel-section-title" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px;">
+                        <span><i class="fa-brands fa-spotify" style="color: #1DB954; margin-right: 6px;"></i> Spotify Streaming Goals</span>
+                        <button id="btn-edit-goals" class="btn" style="width: auto; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-main); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-gear"></i> Edit Goals</button>
+                    </h3>
+                    
+                    <div class="track-cards-container">
+                        <!-- Group Songs -->
+                        <div class="track-card theme-ot4">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">JUMP</h4>
+                                    <p class="track-artist">BLACKPINK</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/5H1sKFMzDeMtXwND3V6hRY?si=377998e5721c4b18" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/jump/1824672652" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=CgCVZdcKcqY" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-jump" style="color: var(--color-primary);">Loading...</span>
+                                    <span id="goal-jump" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 100,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-jump" style="width: 0%; height: 100%; background-color: var(--color-primary); transition: width 1s ease-out; box-shadow: 0 0 8px var(--color-primary);"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-jump" style="font-size: 0.9rem; font-weight: 700; color: var(--color-primary); min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-jump">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="track-card theme-ot4">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">GO</h4>
+                                    <p class="track-artist">BLACKPINK</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/3FZPp9lBUvhsxFxKJi3VkB?si=aa3e8fdf92804d14" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/go/1870067581" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=2GJfWMYCWY0" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            <!-- Live stats row -->
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-go" style="color: var(--color-primary);">Loading...</span>
+                                    <span id="goal-go" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 100,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-go" style="width: 0%; height: 100%; background-color: var(--color-primary); transition: width 1s ease-out; box-shadow: 0 0 8px var(--color-primary);"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-go" style="font-size: 0.9rem; font-weight: 700; color: var(--color-primary); min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-go">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="track-card theme-ot4">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">SHUT DOWN</h4>
+                                    <p class="track-artist">BLACKPINK</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/6tCd8bPvYnceDG7W9M1RMk?si=1f696cf7c90b4e84" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/shut-down/1644440674" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=POe9SOEKotk" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            <!-- Live stats row -->
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-shutdown" style="color: var(--color-primary);">Loading...</span>
+                                    <span id="goal-shutdown" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 100,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-shutdown" style="width: 0%; height: 100%; background-color: var(--color-primary); transition: width 1s ease-out; box-shadow: 0 0 8px var(--color-primary);"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-shutdown" style="font-size: 0.9rem; font-weight: 700; color: var(--color-primary); min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-shutdown">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Member Solos -->
+                        <div class="track-card theme-jisoo">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">Earthquake</h4>
+                                    <p class="track-artist">JISOO</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/10zywlg5b0gQOC3q1A7ADx?si=fbb91f6b430f4a1c" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/earthquake/1794049591" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=2V6lvCUPT8I" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            <!-- Live stats row -->
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-earthquake" style="color: #8C65FF;">Loading...</span>
+                                    <span id="goal-earthquake" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 50,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-earthquake" style="width: 0%; height: 100%; background-color: #8C65FF; transition: width 1s ease-out; box-shadow: 0 0 8px #8C65FF;"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-earthquake" style="font-size: 0.9rem; font-weight: 700; color: #8C65FF; min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-earthquake">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="track-card theme-jennie">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">Like Jennie</h4>
+                                    <p class="track-artist">JENNIE</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/0fK7ie6XwGxQTIkpFoWkd1?si=a7706648690648fc" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/like-jennie/1795979745" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=JSFG-IE8n_c" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            <!-- Live stats row -->
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-likejennie" style="color: #FF1E56;">Loading...</span>
+                                    <span id="goal-likejennie" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 50,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-likejennie" style="width: 0%; height: 100%; background-color: #FF1E56; transition: width 1s ease-out; box-shadow: 0 0 8px #FF1E56;"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-likejennie" style="font-size: 0.9rem; font-weight: 700; color: #FF1E56; min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-likejennie">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="track-card theme-rose">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">Toxic Till the End</h4>
+                                    <p class="track-artist">ROSÉ</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/1z5ebC9238uGoBgzYyvGpQ?si=684ee340ba124ec7" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/toxic-till-the-end/1771105929" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=eA0lHNZ1KCA" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            <!-- Live stats row -->
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-toxictilltheend" style="color: #FFA6C9;">Loading...</span>
+                                    <span id="goal-toxictilltheend" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 50,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-toxictilltheend" style="width: 0%; height: 100%; background-color: #FFA6C9; transition: width 1s ease-out; box-shadow: 0 0 8px #FFA6C9;"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-toxictilltheend" style="font-size: 0.9rem; font-weight: 700; color: #FFA6C9; min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-toxictilltheend">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="track-card theme-lisa">
+                            <div class="track-card-main">
+                                <div class="track-meta">
+                                    <span class="track-goal-badge">GOAL</span>
+                                    <h4 class="track-name" style="margin-top: 6px;">Fuck Up the World</h4>
+                                    <p class="track-artist">LISA</p>
+                                </div>
+                                <div class="track-actions">
+                                    <a href="https://open.spotify.com/track/4rBRRLgdB9DYJhqA9uVcWt?si=ac3e50530f464007" target="_blank" class="btn-track-stream spotify" title="Stream on Spotify"><i class="fa-brands fa-spotify"></i></a>
+                                    <a href="https://music.apple.com/us/song/fxck-up-the-world-feat-future/1798585336" target="_blank" class="btn-track-stream apple" title="Stream on Apple Music"><i class="fa-brands fa-apple"></i></a>
+                                    <a href="https://www.youtube.com/watch?v=r5VRqWkFpEQ" target="_blank" class="btn-track-stream youtube" title="Stream on YouTube"><i class="fa-brands fa-youtube"></i></a>
+                                </div>
+                            </div>
+                            <!-- Live stats row -->
+                            <div class="track-stats-row" style="width: 100%; margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 10px;">
+                                <div class="stream-counts-display" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; font-family: var(--font-sans);">
+                                    <span class="live-stream-val" id="streams-fuckuptheworld" style="color: #FFC800;">Loading...</span>
+                                    <span id="goal-fuckuptheworld" style="color: var(--color-text-muted); font-size: 1rem; font-weight: 500;">/ 50,000,000</span>
+                                </div>
+                                
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <div class="stream-progress-bg" style="flex: 1; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; border: 1px solid var(--color-border);">
+                                        <div class="stream-progress-fill" id="progress-fuckuptheworld" style="width: 0%; height: 100%; background-color: #FFC800; transition: width 1s ease-out; box-shadow: 0 0 8px #FFC800;"></div>
+                                    </div>
+                                    <span class="stream-percent-val" id="percent-fuckuptheworld" style="font-size: 0.9rem; font-weight: 700; color: #FFC800; min-width: 45px; text-align: right;">0.0%</span>
+                                </div>
+
+                                <div class="stream-remaining-row" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span>🏁</span>
+                                    <span id="remaining-fuckuptheworld">Loading remaining...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Leaderboard -->
+                <div class="leaderboard-panel card">
+                    <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 20px; font-weight: 700; text-align: center;">
+                        <i class="fa-solid fa-trophy" style="color: var(--color-primary); margin-right: 8px;"></i> Top 20 Streamers
+                    </h3>
+
+                    <!-- Sync/Submit box -->
+                    <div class="leaderboard-sync-box" style="margin-bottom: 24px; padding: 16px; background-color: var(--color-bg-main); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                        <label for="lastfm-username" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--color-text-main);">Sync Your Spotify Streams (via Last.fm)</label>
+                        <form id="form-sync-streams" style="display: flex; gap: 8px;">
+                            <input type="text" id="lastfm-username" placeholder="Last.fm Username" required style="flex: 1; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background-color: var(--color-bg-card); font-family: var(--font-sans); font-size: 0.9rem; color: var(--color-text-main); outline: none;">
+                            <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 0.85rem;">Sync 🔄</button>
+                        </form>
+                    </div>
+
+                    <!-- Leaderboard List -->
+                    <div class="leaderboard-list" id="leaderboard-list-container">
+                        <!-- Populated dynamically via JS -->
+                        <div class="loading-state" style="text-align: center; padding: 20px; color: var(--color-text-muted);">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading rankings...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Polaroid Zoom Modal Detail -->
@@ -830,6 +1145,29 @@
         </div>
     </div>
 
+    <!-- Admin Streaming Goals Modal -->
+    <div class="modal-overlay" id="admin-streaming-modal">
+        <div class="modal-content card" style="max-width: 600px; padding: 28px 24px; position: relative;">
+            <button class="modal-close" id="admin-streaming-close-btn" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.2rem; color: var(--color-text-muted); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            
+            <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 8px; font-weight: 700; color: var(--color-text-main); display: flex; align-items: center; gap: 8px; text-align: left;">
+                <i class="fa-solid fa-gear" style="color: var(--color-primary);"></i> Edit Streaming Goals
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 20px; text-align: left;">Adjust the baseline streams, daily stream addition rates, and target goals for each song. Playcounts will automatically accumulate daily in real-time!</p>
+            
+            <form id="admin-streaming-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div id="admin-songs-inputs-container" style="display: flex; flex-direction: column; gap: 16px; max-height: 380px; overflow-y: auto; padding-right: 8px; text-align: left;">
+                    <!-- Filled dynamically via JS -->
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 12px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--color-border);">
+                    <button type="button" id="admin-streaming-cancel-btn" class="btn btn-secondary" style="width: auto; padding: 10px 20px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 20px;">Save Changes <i class="fa-solid fa-floppy-disk" style="margin-left: 6px;"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div class="toast" id="toast-notification">
         <span id="toast-message">Notification message here</span>
@@ -883,6 +1221,7 @@
         </div>
         <div class="player-details">
             <div class="track-title" id="player-track-title">Silent Reflections</div>
+            <div class="track-subtitle">lo-fi instrumental piano</div>
             <div class="player-controls">
                 <button id="btn-player-prev" class="btn-ctrl" title="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
                 <button id="btn-player-play" class="btn-ctrl play-pause-btn" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
